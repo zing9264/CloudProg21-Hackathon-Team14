@@ -1,0 +1,10 @@
+{
+  "name": "hw2-backend",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "aws-sdk": "2.2.*",
+    "request": "2.45.*",
+    "winston": "0.8.*"
+  }
+}
