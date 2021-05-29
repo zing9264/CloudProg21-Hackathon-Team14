@@ -18,23 +18,23 @@ item = {
     'discount': '{"A":199 } ',
     'tag': ['FastFood','Fried']
 }
-# STARTUP_SIGNUP_TABLE = 'hackathonTable'
+STARTUP_SIGNUP_TABLE = 'Store_Info'
 AWS_REGION = 'us-east-1'
-# dynamodb = boto3.resource(
-#     'dynamodb', region_name=AWS_REGION)
-# table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
-# response = table.put_item(Item=item)
-# # response = table.delete_item(Key = {'store':'Bar'})
+dynamodb = boto3.resource(
+    'dynamodb', region_name=AWS_REGION)
+table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
+response = table.put_item(Item=item)
+# response = table.delete_item(Key = {'store':'Bar'})
 
-# res = table.get_item(Key={'store': 'KFC'})
-# item = res['Item']
-# print(item['contact'])
-# print(type(item['contact']))
-# print(json.loads(item['contact']))
-# # print(type(json.loads(item['contact'])))
-# print(item['tag'])
-# print(type(item['tag']))
-# print(item['tag'][0])
+res = table.get_item(Key={'store': 'KFC'})
+item = res['Item']
+print(item['contact'])
+print(type(item['contact']))
+print(json.loads(item['contact']))
+# print(type(json.loads(item['contact'])))
+print(item['tag'])
+print(type(item['tag']))
+print(item['tag'][0])
 
 # create S3
 # S3 = 'nthu-2021-team14-hackathon'
@@ -46,20 +46,20 @@ AWS_REGION = 'us-east-1'
 #             isbucketExist=True
 # s3_client = boto3.client('s3')
 # s3_client.create_bucket(Bucket=S3)
-istableExist= False
-ddb_conn = boto3.client(
-        'dynamodb', region_name=AWS_REGION)
-res = ddb_conn.list_tables()     
-print(res)
-for table in res['TableNames']:
-    print(table)
-    if table == 'test':
-        istableExist=True  
+# istableExist= False
+# ddb_conn = boto3.client(
+#         'dynamodb', region_name=AWS_REGION)
+# res = ddb_conn.list_tables()     
+# print(res)
+# for table in res['TableNames']:
+#     print(table)
+#     if table == 'test':
+#         istableExist=True  
 
-if not istableExist:
-    ddb_conn.create_table(
-            TableName="test",
-            KeySchema=[{'AttributeName': 'store', 'KeyType': 'HASH'}],
-            AttributeDefinitions=[
-                {'AttributeName': 'store', 'AttributeType': 'S'}],
-            ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
+# if not istableExist:
+#     ddb_conn.create_table(
+#             TableName="test",
+#             KeySchema=[{'AttributeName': 'store', 'KeyType': 'HASH'}],
+#             AttributeDefinitions=[
+#                 {'AttributeName': 'store', 'AttributeType': 'S'}],
+#             ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})

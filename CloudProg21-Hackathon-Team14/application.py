@@ -87,6 +87,7 @@ def login_post():
 
 # define logout
 
+
 @application.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
@@ -115,7 +116,8 @@ def sign_uppage():
 @application.route('/storepage/<storename>')
 def storepage(storename):
     print(storename)
-    return flask.render_template('storepage.html',storename=storename, flask_debug=application.debug)
+    return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
+
 
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
@@ -124,11 +126,51 @@ def signupFormPost():
     for item in request.form:
         signup_data[item] = request.form[item]
         item_list.append(item)
-        print(signup_data)
-    signup_data_parse(signup_data,item_list)
-    print(item_list)
+    signup_data_parse(signup_data, item_list)
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-    
+
+
+def signup_data_parse(data, item_list):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    normal_count = []
+    discount_count = []
+    for item in item_list:
+        if 'normal' in item and 'price' not in item:
+            normal_count.append(item)
+        elif 'discount' in item and 'price' not in item:
+            discount_count.append(item)
+    # user table
+    user = {}
+    user['id'] = data['inputEmail']
+    user['password'] = data['inputPassword']
+    table = dynamodb.Table(application.config['STORE_LIST'])
+    response = table.put_item(Item=user)
+    print("user info", response)
+    # store info table
+    storeinfo = {'store': data['inputstore'],
+                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
+    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
+    normal = {}
+    discount = {}
+    for i, item in enumerate(normal_count):
+        pricename = 'normal-price-'+str(i+1)
+        normal[data[item]] = data[pricename]
+    for i, item in enumerate(discount_count):
+        pricename = 'discount-price-'+str(i+1)
+        discount[data[item]] = data[pricename]
+    tag = data['tag'].split()
+    storeinfo['contact'] = json.dumps(contact)
+    storeinfo['normal'] = json.dumps(normal)
+    storeinfo['discount'] = json.dumps(discount)
+
+    table = dynamodb.Table(application.config['STORE_INFO'])
+    response = table.put_item(Item=storeinfo)
+    print("store info", response)
+
+    return
+
+
 def add_DBitem(tablename, item):
     # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
