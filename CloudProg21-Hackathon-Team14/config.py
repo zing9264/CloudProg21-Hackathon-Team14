@@ -2,7 +2,8 @@
 # the APP_CONFIG environment variable points to, or provided
 # directly in the application.py code.
 AWS_REGION = 'us-east-1'
-STARTUP_SIGNUP_TABLE = 'hackathonTable'
+STORE_INFO = 'Store_Info'
+STORE_LIST = 'Store_List'
 NEW_SIGNUP_TOPIC = 'club'
 THEME = 'default'
 FLASK_DEBUG = 'true'

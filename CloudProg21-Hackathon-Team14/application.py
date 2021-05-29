@@ -51,7 +51,10 @@ initTableItem = {
     'discount': '{"A":200 } ',
     'tag': ['Chinese', 'HotPot']
 }
-
+initUserList = {
+    'id': 'HotPot',
+    'password': '1111111'
+}
 # check resource exist
 
 
@@ -61,24 +64,41 @@ def check_or_create():
         'dynamodb', region_name=application.config['AWS_REGION'])
     sqs = boto3.resource('sqs', region_name=application.config['AWS_REGION'])
     try:
+        # create store table
         ddb_conn.create_table(
-            TableName=application.config['STARTUP_SIGNUP_TABLE'],
+            TableName=application.config['STORE_INFO'],
             KeySchema=[{'AttributeName': 'store', 'KeyType': 'HASH'}],
             AttributeDefinitions=[
                 {'AttributeName': 'store', 'AttributeType': 'S'}],
             ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
-        ddb_table = ddb_conn.Table(application.config['STARTUP_SIGNUP_TABLE'])
-        ddb_table.put_item(Item=initTableItem)
+        # create user list table
+        ddb_conn.create_table(
+            TableName=application.config['STORE_LIST'],
+            KeySchema=[{'AttributeName': 'id', 'KeyType': 'HASH'},
+                       {'AttributeName': 'password', 'KeyType': 'Range'}],
+            AttributeDefinitions=[
+                {'AttributeName': 'id', 'AttributeType': 'S'},
+                {'AttributeName': 'password', 'AttributeType': 'S'}],
+            ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
     except:
-        ddb_table = ddb_conn.Table(application.config['STARTUP_SIGNUP_TABLE'])
-        ddb_table.put_item(Item=initTableItem)
+        ddb_table = ddb_conn.Table(application.config['STORE_INFO'])
+        ddb_table = ddb_conn.Table(application.config['STORE_LIST'])
         print("table exists")
+
     try:
         print("check sqs...")
         queue = sqs.get_queue_by_name(QueueName=application.config['SQS'])
     except:
         print("sqs doesn't exist , create sqs ...")
         sqs.create_queue(QueueName=application.config['SQS'])
+    try:
+        ddb_table = ddb_conn.Table(application.config['STORE_INFO'])
+        ddb_table.put_item(Item=initTableItem)
+        ddb_table = ddb_conn.Table(application.config['STORE_LIST'])
+        ddb_table.put_item(Item=initUserList)
+        print("init DB table")
+    except:
+        print("init DB item fail")
 
 
 @application.route('/')
@@ -115,7 +135,7 @@ def add_DBitem(item):
     # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
-    table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
+    table = dynamodb.Table(application.config['STORE_INFO'])
     response = table.put_item(Item=item)
     print(response)
     return
@@ -125,7 +145,7 @@ def delete_DBitem(store_name):
     # store_name must be string , use key "store" to delete item
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
-    table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
+    table = dynamodb.Table(application.config['STORE_INFO'])
     response = table.delete_item(Key={'store': store_name})
     print(response)
     return
@@ -134,7 +154,7 @@ def delete_DBitem(store_name):
 def get_DBitem(store_name):
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
-    table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
+    table = dynamodb.Table(application.config['STORE_INFO'])
     res = table.get_item(Key={'store': store_name})
     item = res['Item']
     # json.loads(item['contact']) --> to load json
@@ -142,6 +162,8 @@ def get_DBitem(store_name):
     return item
 
 # parse example
+
+
 def parse_db_item(store_name):
     item = get_DBitem(store_name)
     person_now = item['person_now']         # int?
