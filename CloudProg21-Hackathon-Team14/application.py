@@ -31,7 +31,7 @@ FLASK_DEBUG = 'false' if os.environ.get(
 
 # Create the Flask app
 application = flask.Flask(__name__)
-
+application.secret_key = 'CloudProg21Team14'
 # Load config values specified above
 application.config.from_object(__name__)
 
@@ -42,12 +42,31 @@ application.config.from_pyfile('config.py')
 # Only enable Flask debugging if an env var is set to true
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
+login_manager = LoginManager()
+login_manager.init_app(application)
+login_manager.session_protection = "strong"
+login_manager.login_view = 'login'
+class User(UserMixin):
+    pass
 
-# def load_user(store_id):
-#     dynamodb = boto3.resource(
-#         'dynamodb', region_name=application.config['AWS_REGION'])
-#     table = dynamodb.Table(application.config['STORE_LIST'])
-#     res = table.get_item(Key={'id': store_id})
+def check_user(store_id):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    table = dynamodb.Table(application.config['STORE_LIST'])
+    try:
+        res = table.get_item(Key={'id': store_id})
+        return res['Item']
+    except:
+        print("User doesn't exist")
+        return None
+        
+@login_manager.user_loader
+def load_user(store_id):
+    if check_user(store_id) is not None:
+        curr_user = User()
+        curr_user.id = store_id
+    return curr_user
+
 # # LET USER LOGIN FIRST
 def login_required(f):
     @wraps(f)
@@ -58,31 +77,34 @@ def login_required(f):
         return redirect(url_for('login'))
     return wrap
 
-
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug)
 
+# @application.route('/login')
+# def loginpage():
+#     return flask.render_template('login.html', flask_debug=application.debug)
 
-@application.route('/login')
+@application.route('/login', methods=['GET','POST'])
 def loginpage():
-    return flask.render_template('login.html', flask_debug=application.debug)
-
-
-@application.route('/login', methods=['GET', 'POST'])
-def login_post():
-    email = request.form.get('email')
-    password = request.form.get('password')
+    id = request.form.get('inputEmail')
+    password = request.form.get('inputPassword')
     remember = True if request.form.get('remember') else False
-    print(check_user(email))
-    if check_user(email):
-        if check_user(email) == password:
-            session['logged_in'] = True
-            return Response(password, status=201, mimetype='application/json')
+    print(id)
+    user = check_user(id)
+    if user is not None and request.form['password'] == user['password']:
+        curr_user = User()
+        curr_user.id = id
+        print(curr_user)
+        login_user(curr_user)
+
+        return redirect(url_for('welcome'))
+        # session['logged_in'] = True
+        # return Response(password, status=201, mimetype='application/json')
     else:
-        error = 'Invalid Credentials. Please try again.'
-        return Response(error, status=201, mimetype='application/json')
+        flash('Wrong username or password!')
+        
     return flask.render_template('login.html', flask_debug=application.debug)
 
 # define logout
@@ -212,18 +234,6 @@ def parse_db_item(store_name):
     normal = json.loads(item['normal'])     # dict
     discount = json.loads(item['discount'])  # dict
     tag = item['tag']  # list
-
-
-def check_user(store_id):
-    dynamodb = boto3.resource(
-        'dynamodb', region_name=application.config['AWS_REGION'])
-    table = dynamodb.Table(application.config['STORE_LIST'])
-    try:
-        res = table.get_item(Key={'id': store_id})
-        return res['password']
-    except:
-        print("password not match")
-        return None
 
 
 def upload_to_S3(image):
