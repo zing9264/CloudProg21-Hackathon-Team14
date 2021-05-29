@@ -18,9 +18,10 @@ import json
 import boto3
 
 import flask
-from flask import request, Response ,redirect, url_for ,flash
-from flask_login import LoginManager,UserMixin,login_required, current_user, login_user, logout_user
+from flask import request, Response, redirect, url_for, flash, session
+from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 # Default config vals
 THEME = 'default' if os.environ.get(
@@ -41,66 +42,58 @@ application.config.from_pyfile('config.py')
 # Only enable Flask debugging if an env var is set to true
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
-## LOGIN
-# login_manager = LoginManager()
-# login_manager.init_app(application)
-# login_manager.session_protection = "strong"
-# login_manager.login_view = 'login'
-# class User(UserMixin):
-#     pass
-#     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
-#     password = db.Column(db.String(100))
-    
-# @login_manager.user_loader
+
 # def load_user(store_id):
 #     dynamodb = boto3.resource(
 #         'dynamodb', region_name=application.config['AWS_REGION'])
 #     table = dynamodb.Table(application.config['STORE_LIST'])
 #     res = table.get_item(Key={'id': store_id})
-#     return res
-    # since the user_id is just the primary key of our user table, use it in the query for the user
-    # return User.query.get(int(user_id))
+# # LET USER LOGIN FIRST
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        flash('You need to login first.')
+        return redirect(url_for('login'))
+    return wrap
+
 
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug)
 
+
 @application.route('/login')
 def loginpage():
     return flask.render_template('login.html', flask_debug=application.debug)
 
-<<<<<<< HEAD
-    
-@application.route('/login',methods=['POST'])
+
+@application.route('/login', methods=['POST'])
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-    user = {}
-    user['id'] = email
-    user['password'] = password
     print(check_user(email))
     if check_user(email):
         if check_user(email) == password:
-            login_user(user, remember=remember)
-            return redirect(url_for('/'))
+            session['logged_in'] = True
+            return redirect(url_for('test'))
     else:
-        return redirect(url_for('/login'))
-            
-    # user = {}
-    # user['id'] = email
-    # user['password'] = password
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    # if not user or not check_password_hash(user['password'], password):
-    #     flash('Please check your login details and try again.')
-    #     return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
-    # print(user)
-    # login_user(user, remember=remember)
-    
-    
-=======
+        error = 'Invalid Credentials. Please try again.'
+        return flask.render_template('login.html', error=error)
+
+# define logout
+
+@application.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    session.pop('logged_in', None)
+    flash('You already logout !!!')
+    return redirect(url_for('welcome'))
+
+
 @application.route('/sign_up')
 def sign_uppage():
     return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
@@ -109,38 +102,29 @@ def sign_uppage():
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
-    
+
     for item in request.form:
         signup_data[item] = request.form[item]
         print(signup_data)
 
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
 
->>>>>>> aa183506c924a5b7c1cf40267909131ec7d215dc
+
 @application.route('/signup', methods=['POST'])
 def signup():
     signup_data = dict()
-    
+
     for item in request.form:
         signup_data[item] = request.form[item]
     try:
-        add_DBitem(application.config['STORE_LIST'],signup_data)
+        add_DBitem(application.config['STORE_LIST'], signup_data)
     except ConditionalCheckFailedException:
         return Response("", status=409, mimetype='application/json')
 
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-    
-def send_sqs(signup_data):
-    sqs = boto3.resource('sqs', region_name=application.config['AWS_REGION'])
-    queue = sqs.get_queue_by_name(QueueName=application.config['SQS'])
-    response = queue.send_message(MessageBody=json.dumps(signup_data))
-    print(signup_data)
-    print(response.get('MessageId'))
-    print(response.get('MD5OfMessageBody'))
-    return response
 
 
-def add_DBitem(tablename,item):
+def add_DBitem(tablename, item):
     # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
@@ -150,7 +134,7 @@ def add_DBitem(tablename,item):
     return
 
 
-def delete_DBitem(tablename,store_name):
+def delete_DBitem(tablename, store_name):
     # store_name must be string , use key "store" to delete item
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
@@ -160,7 +144,7 @@ def delete_DBitem(tablename,store_name):
     return
 
 
-def get_DBitem(tablename,store_name):
+def get_DBitem(tablename, store_name):
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
     table = dynamodb.Table(tablename)
@@ -171,14 +155,17 @@ def get_DBitem(tablename,store_name):
     return item
 
 # parse example
+
+
 def parse_db_item(store_name):
-    item = get_DBitem(application.config['STORE_INFO'],store_name)
+    item = get_DBitem(application.config['STORE_INFO'], store_name)
     person_now = item['person_now']         # int?
     person_max = item['person_max']         # int?
     contact = json.loads(item['contact'])   # dict
     normal = json.loads(item['normal'])     # dict
     discount = json.loads(item['discount'])  # dict
     tag = item['tag']  # list
+
 
 def check_user(store_id):
     dynamodb = boto3.resource(
@@ -191,10 +178,12 @@ def check_user(store_id):
         print("password not match")
         return None
 
+
 def upload_to_S3(image):
     s3 = boto3.client('s3')
     s3.upload_file(image)
     return
+
 
 # Connect to DynamoDB and get ref to Table
 initTableItem = {
@@ -211,20 +200,22 @@ initUserList = {
     'password': '1111111'
 }
 # check resource exist
+
+
 def check_or_create():
     # Get the service resource
     ddb_conn = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
     sqs = boto3.resource('sqs', region_name=application.config['AWS_REGION'])
     s3 = boto3.client('s3')
-    isbucketExist=False
+    isbucketExist = False
     # create S3
     response = s3.list_buckets()
-    
+
     for bucket in response['Buckets']:
-            if bucket["Name"] == application.config['S3']:
-                isbucketExist = True
-                
+        if bucket["Name"] == application.config['S3']:
+            isbucketExist = True
+
     if isbucketExist == False:
         try:
             s3_client = boto3.client('s3')
@@ -232,7 +223,6 @@ def check_or_create():
         except Exception as e:
             print(e)
 
-    
     # create table
     try:
         # create store info table
@@ -271,6 +261,7 @@ def check_or_create():
         print("init DB item fail")
 
 # check_or_create()
+
 
 if __name__ == '__main__':
     # application.run(debug=True,host='127.0.0.1')
