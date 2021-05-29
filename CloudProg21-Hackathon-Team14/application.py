@@ -42,16 +42,24 @@ application.config.from_pyfile('config.py')
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
 ## LOGIN
-login_manager = LoginManager()
-login_manager.init_app(application)
-login_manager.session_protection = "strong"
-login_manager.login_view = 'login'
-class User(UserMixin):
-    pass
-@login_manager.user_loader
-def load_user(user_id):
+# login_manager = LoginManager()
+# login_manager.init_app(application)
+# login_manager.session_protection = "strong"
+# login_manager.login_view = 'login'
+# class User(UserMixin):
+#     pass
+#     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+#     password = db.Column(db.String(100))
+    
+# @login_manager.user_loader
+# def load_user(store_id):
+#     dynamodb = boto3.resource(
+#         'dynamodb', region_name=application.config['AWS_REGION'])
+#     table = dynamodb.Table(application.config['STORE_LIST'])
+#     res = table.get_item(Key={'id': store_id})
+#     return res
     # since the user_id is just the primary key of our user table, use it in the query for the user
-    return User.query.get(int(user_id))
+    # return User.query.get(int(user_id))
 
 @application.route('/')
 def welcome():
@@ -62,7 +70,35 @@ def welcome():
 def loginpage():
     return flask.render_template('login.html', flask_debug=application.debug)
 
-
+    
+@application.route('/login',methods=['POST'])
+def login_post():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    remember = True if request.form.get('remember') else False
+    user = {}
+    user['id'] = email
+    user['password'] = password
+    print(check_user(email))
+    if check_user(email):
+        if check_user(email) == password:
+            login_user(user, remember=remember)
+            return redirect(url_for('/'))
+    else:
+        return redirect(url_for('/login'))
+            
+    # user = {}
+    # user['id'] = email
+    # user['password'] = password
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    # if not user or not check_password_hash(user['password'], password):
+    #     flash('Please check your login details and try again.')
+    #     return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+    # print(user)
+    # login_user(user, remember=remember)
+    
+    
 @application.route('/signup', methods=['POST'])
 def signup():
     signup_data = dict()
@@ -74,24 +110,6 @@ def signup():
         return Response("", status=409, mimetype='application/json')
 
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-
-@application.route('/login',methods=['POST'])
-def login_post():
-    email = request.form.get('id')
-    password = request.form.get('password')
-    remember = True if request.form.get('remember') else False
-    
-    user = {}
-    user['id'] = email
-    user['password'] = password
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not user or not check_password_hash(user.password, password):
-        flash('Please check your login details and try again.')
-        return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
-    print(user)
-    login_user(user, remember=remember)
-    return redirect(url_for('profile'))
     
 def send_sqs(signup_data):
     sqs = boto3.resource('sqs', region_name=application.config['AWS_REGION'])
@@ -227,8 +245,7 @@ def check_or_create():
     except:
         print("init DB item fail")
 
-
-check_or_create()
+# check_or_create()
 
 if __name__ == '__main__':
     # application.run(debug=True,host='127.0.0.1')
