@@ -70,7 +70,7 @@ def loginpage():
     return flask.render_template('login.html', flask_debug=application.debug)
 
 
-@application.route('/login', methods=['POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
@@ -79,12 +79,14 @@ def login_post():
     if check_user(email):
         if check_user(email) == password:
             session['logged_in'] = True
-            return redirect(url_for('test'))
+            return Response(password, status=201, mimetype='application/json')
     else:
         error = 'Invalid Credentials. Please try again.'
-        return flask.render_template('login.html', error=error)
+        return Response(error, status=201, mimetype='application/json')
+    return flask.render_template('login.html', flask_debug=application.debug)
 
 # define logout
+
 
 @application.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -97,31 +99,76 @@ def logout():
 @application.route('/sign_up')
 def sign_uppage():
     return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
+# @application.route('/signup', methods=['POST'])
+# def signup():
+#     signup_data = dict()
+
+#     for item in request.form:
+#         signup_data[item] = request.form[item]
+#     try:
+#         add_DBitem(application.config['STORE_LIST'], signup_data)
+#     except ConditionalCheckFailedException:
+#         return Response("", status=409, mimetype='application/json')
+
+#     return flask.render_template('index.html', flask_debug=application.debug)
+
+
+@application.route('/storepage/<storename>')
+def storepage(storename):
+    print(storename)
+    return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
 
 
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
-
+    item_list = []
     for item in request.form:
         signup_data[item] = request.form[item]
-        print(signup_data)
-
+        item_list.append(item)
+    signup_data_parse(signup_data, item_list)
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
 
 
-@application.route('/signup', methods=['POST'])
-def signup():
-    signup_data = dict()
+def signup_data_parse(data, item_list):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    normal_count = []
+    discount_count = []
+    for item in item_list:
+        if 'normal' in item and 'price' not in item:
+            normal_count.append(item)
+        elif 'discount' in item and 'price' not in item:
+            discount_count.append(item)
+    # user table
+    user = {}
+    user['id'] = data['inputEmail']
+    user['password'] = data['inputPassword']
+    table = dynamodb.Table(application.config['STORE_LIST'])
+    response = table.put_item(Item=user)
+    print("user info", response)
+    # store info table
+    storeinfo = {'store': data['inputstore'],
+                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
+    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
+    normal = {}
+    discount = {}
+    for i, item in enumerate(normal_count):
+        pricename = 'normal-price-'+str(i+1)
+        normal[data[item]] = data[pricename]
+    for i, item in enumerate(discount_count):
+        pricename = 'discount-price-'+str(i+1)
+        discount[data[item]] = data[pricename]
+    tag = data['tag'].split()
+    storeinfo['contact'] = json.dumps(contact)
+    storeinfo['normal'] = json.dumps(normal)
+    storeinfo['discount'] = json.dumps(discount)
 
-    for item in request.form:
-        signup_data[item] = request.form[item]
-    try:
-        add_DBitem(application.config['STORE_LIST'], signup_data)
-    except ConditionalCheckFailedException:
-        return Response("", status=409, mimetype='application/json')
+    table = dynamodb.Table(application.config['STORE_INFO'])
+    response = table.put_item(Item=storeinfo)
+    print("store info", response)
 
-    return Response(json.dumps(signup_data), status=201, mimetype='application/json')
+    return
 
 
 def add_DBitem(tablename, item):
