@@ -174,7 +174,7 @@ def storeupdate_storepage(storename):
 
 #更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
 @application.route('/storepage/<storename>/updateFormPost')
-def storeupdate_storepage(storename):
+def update_DBdata(storename):
     update_data = dict()
     item_list = []
     for item in request.form:
