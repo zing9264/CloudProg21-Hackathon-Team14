@@ -28,14 +28,20 @@ response = table.put_item(Item=item)
 
 res = table.get_item(Key={'store': 'KFC'})
 item = res['Item']
-print(item['contact'])
-print(type(item['contact']))
-print(json.loads(item['contact']))
-# print(type(json.loads(item['contact'])))
-print(item['tag'])
-print(type(item['tag']))
-print(item['tag'][0])
+# print(item['contact'])
+# print(type(item['contact']))
+# print(json.loads(item['contact']))
+# # print(type(json.loads(item['contact'])))
+# print(item['tag'])
+# print(type(item['tag']))
+# print(item['tag'][0])
 
+dynamodb = boto3.resource(
+        'dynamodb', region_name=AWS_REGION)
+table = dynamodb.Table('Store_List')
+res = table.get_item(Key={'id': 'HotPot'})
+print(res['Item'])
+print(type(res['Item']))
 # create S3
 # S3 = 'nthu-2021-team14-hackathon'
 # s3 = boto3.client('s3')
