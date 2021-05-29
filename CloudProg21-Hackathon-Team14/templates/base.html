@@ -53,27 +53,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <ul class="nav nav-pills justify-content-end">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <li><a class="nav-link" href="#">About</a></li>
-                </li>
-                <li class="nav-item">
-                    <li><a class="nav-link" href="/login">店家登入</a></li>
-                </li>
-                <li class="nav-item">
-                    <li><a class="nav-link " href="/sign_up">餐廳註冊</a></li>
-                </li>
-            </ul>
+            {% block header %} {% endblock %}
         </div>
+
         {% if flask_debug %}
         <div class="alert alert-danger">
             Flask is in debug mode. This is not safe for production.
         </div>
+        {% endif %}
+
         <main>
-            {% endif %} {% block main %} {% endblock %}
+            {% block main %} {% endblock %}
         </main>
 
         <div class="footer">

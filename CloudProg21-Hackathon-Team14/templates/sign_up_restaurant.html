@@ -1,5 +1,19 @@
-{% extends "base.html" %} {% block title %} 餐廳資料修改 {% endblock %} {% block main %}
-
+{% extends "base.html" %} {% block title %} 餐廳資料修改 {% endblock %} {% block header %}
+<ul class="nav nav-pills justify-content-end">
+    <li class="nav-item">
+        <a class="nav-link " href="/">Home</a>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link" href="#">About</a></li>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link" href="/login">店家登入</a></li>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link active" href="/sign_up">餐廳註冊</a></li>
+    </li>
+</ul>
+{% endblock %} {% block main %}
 <script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <script rel='script' type="text/javascript">
