@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>餐廳資料修改</title>
+
+    <!-- Bootstrap core CSS -->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='bootstrap/css/jumbotron-narrow.css') }}" rel="stylesheet">
+
+    <style>
+        .nav-pills>li.nav-item>a.active>a,
+        .nav-pills>li.nav-item>a.active>a:hover,
+        .nav-pills>li.nav-item>a.active>a:focus {
+            color: #ffffff;
+            background-color: #428bca;
+        }
+        
+        .nav-pills .nav-link.active,
+        .nav-pills .show>.nav-link {
+            color: #fff;
+            background-color: #428bca;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: #428bca;
+            border-color: #428bca;
+        }
+        
+        a.nav-link {
+            color: #428bca;
+        }
+    </style>
+</head>
+
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<script rel='script' type="text/javascript">
+    normal_idx = 2
+    discount_idx = 2
+
+    function addnormalF() {
+        var addnormal_view = document.querySelector('#addnormaldiv');
+        var thisnormal = "normal-" + normal_idx;
+        var thisnormal_price = "normal-price-" + normal_idx;
+
+        var div_outer = document.createElement("div");
+        div_outer.setAttribute("class", "form-group col-md-6");
+        var label_normal = document.createElement("label");
+        label_normal.setAttribute("for", thisnormal);
+        label_normal.innerHTML = "餐點" + normal_idx
+        var input_normal = document.createElement("input");
+        input_normal.setAttribute("type", "text");
+        input_normal.setAttribute("class", "form-control");
+        input_normal.setAttribute("id", thisnormal);
+        input_normal.setAttribute("name", thisnormal);
+        input_normal.setAttribute("placeholder", "牛肉");
+        div_outer.appendChild(label_normal);
+        div_outer.appendChild(input_normal);
+        addnormal_view.appendChild(div_outer);
+
+        var div_outer = document.createElement("div");
+        div_outer.setAttribute("class", "form-group col-md-6");
+        var label_normal = document.createElement("label");
+        label_normal.setAttribute("for", thisnormal_price);
+        label_normal.innerHTML = "價格" + normal_idx
+        var input_normal = document.createElement("input");
+        input_normal.setAttribute("type", "text");
+        input_normal.setAttribute("class", "form-control");
+        input_normal.setAttribute("id", thisnormal_price);
+        input_normal.setAttribute("name", thisnormal_price);
+        input_normal.setAttribute("oninput", "value=value.replace(/[^\\d]/g,'')");
+        input_normal.setAttribute("placeholder", "120");
+        div_outer.appendChild(label_normal);
+        div_outer.appendChild(input_normal);
+        addnormal_view.appendChild(div_outer);
+        normal_idx++;
+    }
+
+    function adddiscountF() {
+        var adddiscount_view = document.querySelector('#adddiscountdiv');
+
+        var thisdiscount = "discount-" + discount_idx;
+        var thisdiscount_price = "discount-price-" + discount_idx;
+
+        var div_outer = document.createElement("div");
+        div_outer.setAttribute("class", "form-group col-md-6");
+        var label_discount = document.createElement("label");
+        label_discount.setAttribute("for", thisdiscount);
+        label_discount.innerHTML = "優惠餐點" + discount_idx
+        var input_discount = document.createElement("input");
+        input_discount.setAttribute("type", "text");
+        input_discount.setAttribute("class", "form-control");
+        input_discount.setAttribute("id", thisdiscount);
+        input_discount.setAttribute("name", thisdiscount);
+        input_discount.setAttribute("placeholder", "A套餐:牛肉+白飯+紅茶");
+        div_outer.appendChild(label_discount);
+        div_outer.appendChild(input_discount);
+        adddiscount_view.appendChild(div_outer);
+
+        var div_outer = document.createElement("div");
+        div_outer.setAttribute("class", "form-group col-md-6");
+        var label_discount = document.createElement("label");
+        label_discount.setAttribute("for", thisdiscount_price);
+        label_discount.innerHTML = "價格" + discount_idx
+        var input_discount = document.createElement("input");
+        input_discount.setAttribute("type", "text");
+        input_discount.setAttribute("class", "form-control");
+        input_discount.setAttribute("id", thisdiscount_price);
+        input_discount.setAttribute("name", thisdiscount_price);
+        input_discount.setAttribute("oninput", "value=value.replace(/[^\\d]/g,'')");
+        input_discount.setAttribute("placeholder", "300");
+        div_outer.appendChild(label_discount);
+        div_outer.appendChild(input_discount);
+        adddiscount_view.appendChild(div_outer);
+        adddiscount_view.appendChild(div_outer);
+        discount_idx++;
+    }
+</script>
+
+
+<body>
+    <div class="container">
+        <div class="header">
+            <ul class="nav nav-pills justify-content-end">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <li><a class="nav-link" href="#">About</a></li>
+                </li>
+                <li class="nav-item">
+                    <li><a class="nav-link" href="/login">店家登入</a></li>
+                </li>
+                <li class="nav-item">
+                    <li><a class="nav-link active" href="/sign_up">餐廳註冊</a></li>
+                </li>
+            </ul>
+        </div>
+
+        {% if flask_debug %}
+        <div class="alert alert-danger">
+            Flask is in debug mode. This is not safe for production.
+        </div>
+        {% endif %}
+        <div id="signupSuccess" class="alert alert-success" style="display:none">
+            <p id="signupSuccessText">恭喜! 成功註冊</p>
+        </div>
+        <div id="signupDuplicate" class="alert alert-success" style="display:none">
+            <p id="signupDuplicateText">已有此帳號 重複註冊</p>
+        </div>
+        <div id="signupError" class="alert alert-info" style="display:none">
+            <p id="signupErrorText">Well this is embarrassing. It looks like we're having trouble getting you on the list.</p>
+        </div>
+
+        <form id="signupForm" role="form" action="/signupFormPost" method="post">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputEmail">Email</label>
+                    <input type="email" class="form-control" name="inputEmail" id="inputEmail" placeholder="Email">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputPassword">密碼</label>
+                    <input type="password" class="form-control" name="inputPassword" id="inputPassword" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputAddress">地址</label>
+                    <input type="text" class="form-control" name="inputAddress" id="inputAddress" placeholder="XX縣XX市XX區XX路XX號">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputphone">連絡電話</label>
+                    <input type="text" oninput="value=value.replace(/[^\d]/g,'')" class="form-control" name="inputphone" id="inputphone" placeholder="0989744940">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputstore">店名</label>
+                    <input type="text" class="form-control" id="inputstore" name="inputstore" placeholder="EX: Three Mother HotPot">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputperson_max">最大人數</label>
+                    <input type="number" class="form-control" id="inputperson_max" name="inputperson_max" placeholder="10">
+                </div>
+            </div>
+
+            <div class="form-row" id="addnormaldiv">
+                <div class="form-group col-md-6">
+                    <label for="normal-1">餐點1</label>
+                    <input type="text" class="form-control" id="normal-1" name="normal-1" placeholder="牛肉">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="normal-price-1">價格1</label>
+                    <input type="text" oninput="value=value.replace(/[^\d]/g,'')" class="form-control" id="normal-price-1" name="normal-price-1" placeholder="120">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <button id="addnormal" type="button" class="btn btn-primary" onclick='addnormalF()'>新增餐點</button>
+                </div>
+            </div>
+
+
+            <div class="form-row" id="adddiscountdiv">
+
+                <div class="form-group col-md-6">
+                    <label for="discount-1">優惠餐點1</label>
+                    <input type="text" class="form-control" name="discount-1" id="discount-1" placeholder="A套餐:牛肉+白飯+紅茶">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="discount-price-1">價格1</label>
+                    <input type="text" class="form-control" name="discount-price-1" id="discount-price-1" placeholder="300">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <button id="adddiscount" type="button" onclick='adddiscountF()' class="btn btn-primary">新增優惠餐點</button>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12 ">
+                    <button id="submit" type="submit" class="btn btn-primary">註冊</button>
+                </div>
+            </div>
+
+        </form>
+
+
+        <div class="footer">
+            <p>&copy; CloudProg21-Hackathon-Team14</p>
+        </div>
+
+    </div>
+    <!-- /container -->
+
+</body>
+
+</html>
