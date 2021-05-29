@@ -70,7 +70,7 @@ def loginpage():
     return flask.render_template('login.html', flask_debug=application.debug)
 
 
-@application.route('/login', methods=['POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
@@ -79,10 +79,11 @@ def login_post():
     if check_user(email):
         if check_user(email) == password:
             session['logged_in'] = True
-            return redirect(url_for('test'))
+            return Response(password, status=201, mimetype='application/json')
     else:
         error = 'Invalid Credentials. Please try again.'
-        return flask.render_template('login.html', error=error)
+        return Response(error, status=201, mimetype='application/json')
+    return flask.render_template('login.html', flask_debug=application.debug)
 
 # define logout
 
@@ -97,33 +98,31 @@ def logout():
 @application.route('/sign_up')
 def sign_uppage():
     return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
+# @application.route('/signup', methods=['POST'])
+# def signup():
+#     signup_data = dict()
 
+#     for item in request.form:
+#         signup_data[item] = request.form[item]
+#     try:
+#         add_DBitem(application.config['STORE_LIST'], signup_data)
+#     except ConditionalCheckFailedException:
+#         return Response("", status=409, mimetype='application/json')
+
+#     return flask.render_template('index.html', flask_debug=application.debug)
 
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
-
+    item_list = []
     for item in request.form:
         signup_data[item] = request.form[item]
+        item_list.append(item)
         print(signup_data)
-
+    signup_data_parse(signup_data,item_list)
+    print(item_list)
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-
-
-@application.route('/signup', methods=['POST'])
-def signup():
-    signup_data = dict()
-
-    for item in request.form:
-        signup_data[item] = request.form[item]
-    try:
-        add_DBitem(application.config['STORE_LIST'], signup_data)
-    except ConditionalCheckFailedException:
-        return Response("", status=409, mimetype='application/json')
-
-    return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-
-
+    
 def add_DBitem(tablename, item):
     # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
