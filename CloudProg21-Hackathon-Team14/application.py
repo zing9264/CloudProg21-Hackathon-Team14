@@ -141,6 +141,49 @@ def storepage(storename):
     return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
 
 
+ 
+ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@application.route('/storepage/<storename>/upload_file_page')
+def upload_file_page(storename):
+    print(storename)
+    return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+
+@application.route('/storepage/<storename>/image_upload', methods=['POST'])
+def storeimage_upload(storename):
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+        file = request.files['file']
+        if file == '':
+            flash('No image selected for uploading')
+            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+        print(request.files)
+        print(file)
+        print(file.filename)
+        if file and allowed_file(file.filename):
+            filename = storename+'.jpg'
+            file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
+            #print('upload_image filename: ' + filename)
+            flash('Image successfully uploaded and displayed below')
+            return flask.render_template('upload_image.html', filename=filename ,storename=storename, flask_debug=application.debug)
+        else:
+            flash('Allowed image types are - png, jpg, jpeg')
+            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+
+@application.route('/display/<filename>')
+def display_image(filename):
+    return redirect(url_for('static', filename='uploads/' + filename), code=301)
+
+@application.route('/storepage/<storename>/update_storepage')
+def storeupdate_storepage(storename):
+    print(storename)
+    return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
+
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
