@@ -67,6 +67,8 @@ def load_user(store_id):
         curr_user.id = store_id
     return curr_user
 
+
+
 # # LET USER LOGIN FIRST
 def login_required(f):
     @wraps(f)
@@ -83,6 +85,10 @@ def login_required(f):
 def welcome():
     theme = application.config['THEME']
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug)
+
+@application.route('/sign_up')
+def sign_uppage():
+    return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
 
 # @application.route('/login')
 # def loginpage():
