@@ -77,6 +77,8 @@ def login_required(f):
         return redirect(url_for('login'))
     return wrap
 
+
+#這塊需要從資料庫撈資料 並用jinja2 渲染到前端
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
@@ -118,23 +120,7 @@ def logout():
     return redirect(url_for('welcome'))
 
 
-@application.route('/sign_up')
-def sign_uppage():
-    return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
-# @application.route('/signup', methods=['POST'])
-# def signup():
-#     signup_data = dict()
-
-#     for item in request.form:
-#         signup_data[item] = request.form[item]
-#     try:
-#         add_DBitem(application.config['STORE_LIST'], signup_data)
-#     except ConditionalCheckFailedException:
-#         return Response("", status=409, mimetype='application/json')
-
-#     return flask.render_template('index.html', flask_debug=application.debug)
-
-
+#店家詳細資料這塊需要傳入所有資料庫變數，用jinja2 render出來
 @application.route('/storepage/<storename>')
 def storepage(storename):
     print(storename)
@@ -146,12 +132,13 @@ ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
+#上傳圖片頁面
 @application.route('/storepage/<storename>/upload_file_page')
 def upload_file_page(storename):
     print(storename)
     return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
 
+#上傳圖片功能，會存檔到UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
 @application.route('/storepage/<storename>/image_upload', methods=['POST'])
 def storeimage_upload(storename):
     if request.method == 'POST':
@@ -162,9 +149,7 @@ def storeimage_upload(storename):
         if file == '':
             flash('No image selected for uploading')
             return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
-        print(request.files)
-        print(file)
-        print(file.filename)
+
         if file and allowed_file(file.filename):
             filename = storename+'.jpg'
             file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
@@ -175,15 +160,33 @@ def storeimage_upload(storename):
             flash('Allowed image types are - png, jpg, jpeg')
             return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
 
+#回傳圖片位置 UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
 @application.route('/display/<filename>')
 def display_image(filename):
     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
+#更新店家資料頁面 這塊需要傳入所有資料庫變數，用jinja2 render出來
 @application.route('/storepage/<storename>/update_storepage')
 def storeupdate_storepage(storename):
     print(storename)
     return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
 
+
+#更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
+@application.route('/storepage/<storename>/updateFormPost')
+def storeupdate_storepage(storename):
+    update_data = dict()
+    item_list = []
+    for item in request.form:
+        signup_data[item] = request.form[item]
+        item_list.append(item)
+    print(update_data)
+    print(item_list)
+    return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
+
+
+
+#註冊帳號與所有資料
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
@@ -194,7 +197,7 @@ def signupFormPost():
     signup_data_parse(signup_data, item_list)
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
 
-
+#註冊帳號用的語法分析器
 def signup_data_parse(data, item_list):
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
