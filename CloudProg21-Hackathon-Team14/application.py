@@ -99,6 +99,12 @@ def sign_uppage():
     return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
 
 
+
+@application.route('/storepage/<storename>')
+def storepage(storename):
+    print(storename)
+    return flask.render_template('storepage.html',storename=storename, flask_debug=application.debug)
+
 @application.route('/signupFormPost', methods=['POST'])
 def signupFormPost():
     signup_data = dict()
