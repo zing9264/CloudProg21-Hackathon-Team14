@@ -62,10 +62,25 @@ def welcome():
 def loginpage():
     return flask.render_template('login.html', flask_debug=application.debug)
 
+@application.route('/sign_up')
+def sign_uppage():
+    return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
+
+
+@application.route('/signupFormPost', methods=['POST'])
+def signupFormPost():
+    signup_data = dict()
+    
+    for item in request.form:
+        signup_data[item] = request.form[item]
+        print(signup_data)
+
+    return Response(json.dumps(signup_data), status=201, mimetype='application/json')
 
 @application.route('/signup', methods=['POST'])
 def signup():
     signup_data = dict()
+    
     for item in request.form:
         signup_data[item] = request.form[item]
     try:
@@ -186,9 +201,15 @@ def check_or_create():
     
     for bucket in response['Buckets']:
             if bucket["Name"] == application.config['S3']:
-                isbucketExist=True
-    s3_client = boto3.client('s3')
-    s3_client.create_bucket(Bucket=application.config['S3'])
+                isbucketExist = True
+                
+    if isbucketExist == False:
+        try:
+            s3_client = boto3.client('s3')
+            s3_client.create_bucket(Bucket=application.config['S3'])
+        except Exception as e:
+            print(e)
+
     
     # create table
     try:
