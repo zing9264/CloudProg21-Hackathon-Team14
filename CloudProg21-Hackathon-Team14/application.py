@@ -42,6 +42,15 @@ application.config.from_pyfile('config.py')
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
 # Connect to DynamoDB and get ref to Table
+initTableItem = {
+    'store': 'HotPot',
+    'person_max': 40,
+    'person_now': 32,
+    'contact': ' {"phone":"0800092000", "address":"XX區XX路XX號" } ',
+    'normal': '{"A": 228, "B": 300 }',
+    'discount': '{"A":200 } ',
+    'tag': ['Chinese', 'HotPot']
+}
 
 # check resource exist
 
@@ -54,22 +63,21 @@ def check_or_create():
     try:
         ddb_conn.create_table(
             TableName=application.config['STARTUP_SIGNUP_TABLE'],
-            KeySchema=[{'AttributeName': 'name', 'KeyType': 'HASH'},
-                       {'AttributeName': 'email', 'KeyType': 'RANGE'}],
-            AttributeDefinitions=[{'AttributeName': 'name', 'AttributeType': 'S'},
-                                  {'AttributeName': 'email', 'AttributeType': 'S'}],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5, 'WriteCapacityUnits': 5}
-        )
-    # ddb_table = ddb_conn.Table(STARTUP_SIGNUP_TABLE)
+            KeySchema=[{'AttributeName': 'store', 'KeyType': 'HASH'}],
+            AttributeDefinitions=[
+                {'AttributeName': 'store', 'AttributeType': 'S'}],
+            ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
+        ddb_table = ddb_conn.Table(application.config['STARTUP_SIGNUP_TABLE'])
+        ddb_table.put_item(Item=initTableItem)
     except:
         ddb_table = ddb_conn.Table(application.config['STARTUP_SIGNUP_TABLE'])
+        ddb_table.put_item(Item=initTableItem)
         print("table exists")
     try:
         print("check sqs...")
         queue = sqs.get_queue_by_name(QueueName=application.config['SQS'])
     except:
-        print("sqs doesn't exist , create table ...")
+        print("sqs doesn't exist , create sqs ...")
         sqs.create_queue(QueueName=application.config['SQS'])
 
 
@@ -86,18 +94,11 @@ def signup():
         signup_data[item] = request.form[item]
     try:
         send_sqs(signup_data)
-        putDB_signup(signup_data)
+        add_DBitem(signup_data)
     except ConditionalCheckFailedException:
         return Response("", status=409, mimetype='application/json')
 
     return Response(json.dumps(signup_data), status=201, mimetype='application/json')
-
-
-'''
-def store_in_dynamo(signup_data):
-    signup_item = Item(ddb_table, data=signup_data)
-    signup_item.save()
-'''
 
 
 def send_sqs(signup_data):
@@ -110,13 +111,45 @@ def send_sqs(signup_data):
     return response
 
 
-def putDB_signup(signup_data):
+def add_DBitem(item):
+    # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
     table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
-    response = table.put_item(Item=signup_data)
+    response = table.put_item(Item=item)
     print(response)
     return
+
+
+def delete_DBitem(store_name):
+    # store_name must be string , use key "store" to delete item
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
+    response = table.delete_item(Key={'store': store_name})
+    print(response)
+    return
+
+
+def get_DBitem(store_name):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    table = dynamodb.Table(application.config['STARTUP_SIGNUP_TABLE'])
+    res = table.get_item(Key={'store': store_name})
+    item = res['Item']
+    # json.loads(item['contact']) --> to load json
+    # item['tag'][0] --> to get tag
+    return item
+
+# parse example
+def parse_db_item(store_name):
+    item = get_DBitem(store_name)
+    person_now = item['person_now']         # int?
+    person_max = item['person_max']         # int?
+    contact = json.loads(item['contact'])   # dict
+    normal = json.loads(item['normal'])     # dict
+    discount = json.loads(item['discount'])  # dict
+    tag = item['tag']  # list
 
 
 check_or_create()

@@ -2,8 +2,8 @@
 # the APP_CONFIG environment variable points to, or provided
 # directly in the application.py code.
 AWS_REGION = 'us-east-1'
-STARTUP_SIGNUP_TABLE = 'HW2table'
+STARTUP_SIGNUP_TABLE = 'hackathonTable'
 NEW_SIGNUP_TOPIC = 'club'
 THEME = 'default'
 FLASK_DEBUG = 'true'
-SQS = 'HW2Queue'
+SQS = 'hackathonQueue'
