@@ -106,6 +106,10 @@ def welcome():
     theme = application.config['THEME']
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug)
 
+@application.route('/login')
+def loginpage():
+    return flask.render_template('login.html', flask_debug=application.debug)
+
 
 @application.route('/signup', methods=['POST'])
 def signup():
