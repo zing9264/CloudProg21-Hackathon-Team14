@@ -42,6 +42,10 @@
         a.nav-link {
             color: #428bca;
         }
+        
+        .store-card {
+            margin-bottom: 1rem;
+        }
     </style>
 
 </head>
@@ -51,7 +55,7 @@
         <div class="header">
             <ul class="nav nav-pills justify-content-end">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
+                    <a class="nav-link active" href="/">Home</a>
                 </li>
                 <li class="nav-item">
                     <li><a class="nav-link" href="#">About</a></li>
@@ -60,7 +64,7 @@
                     <li><a class="nav-link" href="/login">店家登入</a></li>
                 </li>
                 <li class="nav-item">
-                    <li><a class="nav-link active" href="/sign_up">餐廳註冊</a></li>
+                    <li><a class="nav-link " href="/sign_up">餐廳註冊</a></li>
                 </li>
             </ul>
         </div>
@@ -69,19 +73,63 @@
             Flask is in debug mode. This is not safe for production.
         </div>
         {% endif %}
-        <div id="signupSuccess" class="alert alert-success" style="display:none">
-            <p id="signupSuccessText">Thanks for signing up! You'll be among the first to know when we launch.</p>
-        </div>
-        <div id="signupDuplicate" class="alert alert-success" style="display:none">
-            <p id="signupDuplicateText">Fear not, you're already on the list! You'll be among the first to know when we launch.</p>
-        </div>
-        <div id="signupError" class="alert alert-info" style="display:none">
-            <p id="signupErrorText">Well this is embarrassing. It looks like we're having trouble getting you on the list.</p>
-        </div>
+
         <div class="jumbotron">
             <h1>The next big thing is coming...</h1>
             <p class="lead">We're pretty thrilled to unveil our latest creation. Sign up below to be notified when we officially launch!</p>
             <p><a class="btn btn-lg btn-success" data-toggle="modal" href="#signupModal">Sign up today</a></p>
+        </div>
+
+        <div class="storelist">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card store-card">
+                        <div class=" card-body">
+                            <h5 class="card-title" id='storeName-1'>麥當勞酒吧</h5>
+                            <p class="card-text">人數: 5 / 30 </p>
+                            <p class="card-text">距離: 1.5km </p>
+                            <a href="#" class="btn btn-primary">詳細資訊</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card store-card ">
+                        <div class="card-body">
+                            <h5 class="card-title">Special title treatment</h5>
+                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="store-card card">
+                        <div class="card-body">
+                            <h5 class="card-title">Special title treatment</h5>
+                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card store-card ">
+                        <div class="card-body">
+                            <h5 class="card-title">Special title treatment</h5>
+                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card store-card ">
+                        <div class="card-body">
+                            <h5 class="card-title">Special title treatment</h5>
+                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
 
@@ -89,70 +137,9 @@
             <p>&copy; A New Startup 2013</p>
         </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Provide a few details and we'll be in touch...</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form id="signupForm" role="form">
-                            <div class="form-group">
-                                <label for="name">ID (email address)</label>
-                                <input type="text" class="form-control" id="id" name="id" placeholder="Your id">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Password</label>
-                                <input type="email" class="form-control" id="password" name="password" placeholder="Your password">
-                            </div>
-                            <!-- <div class="form-group">
-                   <label for="gender">gender</label>
-                   <select class="form-control" name="gender">
-                     <option>F</option>
-                     <option>M</option>
-                   </select>
-                 </div> -->
-                    </div>
-                    <div class="modal-footer">
-                        <button id="signup" type="button" class="btn btn-primary">Sign Up!</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-        <!-- /.modal -->
-
     </div>
     <!-- /container -->
 
-    <script src="{{ url_for('static', filename=" jquery/jquery.js ") }}"></script>
-    <script src="{{ url_for('static', filename=" bootstrap/js/bootstrap.min.js ") }}"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#signup").click(function() {
-                $.post("/signup", $("#signupForm").serialize(),
-                        function(data) {
-                            $("#signupSuccess").show();
-                        }
-                    )
-                    .error(function(xhr) {
-                        switch (xhr.status) {
-                            case 409:
-                                $("#signupDuplicate").show();
-                                break;
-                            default:
-                                $("#signupError").show();
-                        }
-                    })
-                    .always(function() {
-                        $("#signupModal").modal('hide');
-                    });
-            })
-        })
-    </script>
 </body>
 
 </html>
