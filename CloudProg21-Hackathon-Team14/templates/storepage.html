@@ -59,16 +59,16 @@
     }
 </style>
 
-{% with messages = get_flashed_messages() %}            {% if messages %}
+{% with messages = get_flashed_messages() %}            {% if messages %}
 <ul>
     {% for message in messages %}
     <li>{{ message }}</li>
     {% endfor %}
 </ul>
-{% endif %}         {% endwith %}
+{% endif %}         {% endwith %}
 
 <div class="row" style="margin-bottom: 1rem;">
-    <!-- <image src="{{ url_for('static', filename='image/{{info.store}}.jpg') }}" style="width: 100%; "></image> -->
+    <image src="{{object_url}}{{info.store}}.jpg" style="width: 100%; "></image>
 </div>
 <div class="row text-center" style="margin-bottom: 1rem;">
     <div class="col-sm-6">
