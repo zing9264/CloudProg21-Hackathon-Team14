@@ -301,8 +301,6 @@ def update_data_parse(data, item_list,storename):
     storeinfo['contact'] = json.dumps(contact)
     storeinfo['normal'] = json.dumps(normal)
     storeinfo['discount'] = json.dumps(discount)
-    # set default person
-    storeinfo['person_now'] = 0
     table = dynamodb.Table(application.config['STORE_INFO'])
     response = table.put_item(Item=storeinfo)
     print("store info", response)
@@ -460,7 +458,7 @@ def check_or_create():
     except:
         print("init DB item fail")
 
-check_or_create()
+# check_or_create()
 
 
 if __name__ == '__main__':
