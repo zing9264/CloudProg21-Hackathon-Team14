@@ -106,10 +106,16 @@ def logout():
 # DEFINE S3  source url
 object_url = "https://"+application.config['S3'] +".s3.amazonaws.com/"
 # #這塊需要從資料庫撈資料 並用jinja2 渲染到前端
+
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
     store_list = get_all_store_DBitem(application.config['STORE_INFO'])
+    print(store_list)
+    for i in range(len(store_list)):
+        store_list[i]['contact']=json.loads(store_list[i]['contact'])
+        print(store_list[i]['contact']['address'])
+
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug , stores = store_list, object_url=object_url)
 
 
@@ -127,7 +133,7 @@ def storepage(storename):
                                 info = storeinfo,
                                 contact = contact,
                                 normal = normal,
-                                object_url = object_url,
+                                object_url=object_url,
                                 discount = discount)
 
  
@@ -158,10 +164,11 @@ def storeimage_upload(storename):
         if file and allowed_file(file.filename):
             filename = storename+'.jpg'
             upload_to_S3(file,filename)
+            print(filename)
             # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
-            return flask.render_template('upload_image.html', filename=filename ,storename=storename, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', filename=filename ,storename=storename,object_url=object_url, flask_debug=application.debug)
         else:
             flash('Allowed image types are - png, jpg, jpeg')
             return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
@@ -183,7 +190,7 @@ def storeupdate_storepage(storename):
     normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
     discount = dict_to_2Darray(json.loads(storeinfo['discount']))
     if userinfo['storename'] == storename:
-        return flask.render_template('update_storepage.html', info = storeinfo,
+        return flask.render_template('update_storepage.html',storename=storename, info = storeinfo,
                                 contact = contact,
                                 normal = normal,
                                 discount = discount, flask_debug=application.debug)
@@ -193,7 +200,7 @@ def storeupdate_storepage(storename):
     # return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
 
 #更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
-@application.route('/storepage/<storename>/updateFormPost')
+@application.route('/storepage/<storename>/updateFormPost' ,methods=['POST'])
 @login_required
 def update_DBdata(storename):
     update_data = dict()
@@ -204,7 +211,9 @@ def update_DBdata(storename):
         item_list.append(item)
     print(data)
     print(item_list)
-    return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
+    update_data_parse(data, item_list , storename)
+    flash('UPDATE SUCCESS')
+    return redirect(url_for('storepage',storename=storename))
 
 #註冊帳號與所有資料
 @application.route('/signupFormPost', methods=['POST'])
@@ -253,7 +262,43 @@ def signup_data_parse(data, item_list):
     storeinfo['contact'] = json.dumps(contact)
     storeinfo['normal'] = json.dumps(normal)
     storeinfo['discount'] = json.dumps(discount)
+    # set default person
+    storeinfo['person_now'] = 0
+    table = dynamodb.Table(application.config['STORE_INFO'])
+    response = table.put_item(Item=storeinfo)
+    print("store info", response)
 
+    return
+
+
+def update_data_parse(data, item_list,storename):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    normal_count = []
+    discount_count = []
+    for item in item_list:
+        if 'normal' in item and 'price' not in item:
+            normal_count.append(item)
+        elif 'discount' in item and 'price' not in item:
+            discount_count.append(item)
+    # store info table
+    storeinfo = {'store': storename,
+                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
+    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
+    normal = {}
+    discount = {}
+    for i, item in enumerate(normal_count):
+        pricename = 'normal-price-'+str(i+1)
+        normal[data[item]] = data[pricename]
+    for i, item in enumerate(discount_count):
+        pricename = 'discount-price-'+str(i+1)
+        discount[data[item]] = data[pricename]
+    tag = data['tag'].split()
+    storeinfo['contact'] = json.dumps(contact)
+    storeinfo['normal'] = json.dumps(normal)
+    storeinfo['discount'] = json.dumps(discount)
+    # set default person
+    storeinfo['person_now'] = 0
     table = dynamodb.Table(application.config['STORE_INFO'])
     response = table.put_item(Item=storeinfo)
     print("store info", response)

@@ -4,6 +4,7 @@ import boto3
 import logging
 import urllib.parse
 
+SQS_URL = "https://sqs.us-east-1.amazonaws.com/486184014670/hackathonQueue"
 # AWS rekognition: detect_labels 搬過來用 (不用face是因為如果相片中背對的人也可以算到人數)
 s3 = boto3.client('s3')
 def detect_labels(bucket, key):
@@ -49,12 +50,20 @@ def lambda_handler(event, context):
     # # response = detect_labels(key, bucket)
     response = detect_labels(bucket, key)
     print(response)
-    
-    msg = send_sqs_message('https://sqs.us-east-1.amazonaws.com/662802416147/N', response) # 改一下要接收的SQS url 且SQS policy 要開
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    table = dynamodb.Table('Store_Info')
+    key = key[:-4]
+    print(key)
+    table.update_item(
+            Key={
+                'store': key,
+            },
+            UpdateExpression="set person_now = :pn",
+            ExpressionAttributeValues={
+                ':pn': response,
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+        
+    # msg = send_sqs_message(SQS_URL, response) # 改一下要接收的SQS url 且SQS policy 要開
     # print(msg)
-
-    # except Exception as e:
-    #     print(e)
-    #     print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
-    #     raise e
-    

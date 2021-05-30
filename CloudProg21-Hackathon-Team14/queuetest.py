@@ -18,21 +18,36 @@ items = {
     'discount': '{"A":199 } ',
     'tag': ['FastFood','Fried']
 }
-# def dict_to_2Darray(dict_data):
-#     array_2D =[]
-#     for item in dict_data:
-#         a = [item ,dict_data[item]]
-#         array_2D.append(a)
-#     return array_2D
+def dict_to_2Darray(dict_data):
+    array_2D =[]
+    for item in dict_data:
+        a = [item ,dict_data[item]]
+        array_2D.append(a)
+    return array_2D
     
-# normal_list = dict_to_2Darray(json.loads(items['normal']))
-# print(normal_list)
+normal_list = dict_to_2Darray(json.loads(items['normal']))
+print(normal_list)
 STARTUP_SIGNUP_TABLE = 'Store_Info'
 AWS_REGION = 'us-east-1'
-# dynamodb = boto3.resource(
-#     'dynamodb', region_name=AWS_REGION)
-# table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
-# res = table.scan()
+dynamodb = boto3.resource(
+    'dynamodb', region_name=AWS_REGION)
+table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
+key = 'TEST.jpg'
+key = key[:-4]
+print(key)
+num = 30
+table.update_item(
+        Key={
+            'store': key,
+        },
+        UpdateExpression="set person_now = :pn",
+        ExpressionAttributeValues={
+            ':pn': num,
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
+# # res = table.scan()
 # # print(res['Items'])
 # store_info_list = res['Items']
 # for store in store_info_list:
@@ -49,7 +64,6 @@ AWS_REGION = 'us-east-1'
 # print(item['tag'])
 # print(type(item['tag']))
 # print(item['tag'][0])
-
 # dynamodb = boto3.resource(
 #         'dynamodb', region_name=AWS_REGION)
 # table = dynamodb.Table('Store_List')
@@ -57,12 +71,8 @@ AWS_REGION = 'us-east-1'
 # print(res['Item'])
 # print(type(res['Item']))
 # create S3
-S3 = 'nthu-2021-team14-hackathon'
-s3 = boto3.client('s3')
-# res = s3.get_object(Bucket=S3,Key = '1500test.jpg')
-object_url = "https://nthu-2021-team14-hackathon.s3.amazonaws.com/{1}".format(S3,'1500test.jpg')
-
-print(object_url)
+# S3 = 'nthu-2021-team14-hackathon'
+# s3 = boto3.client('s3')
 # response = s3.list_buckets()
 # isbucketExist=False
 # for bucket in response['Buckets']:
