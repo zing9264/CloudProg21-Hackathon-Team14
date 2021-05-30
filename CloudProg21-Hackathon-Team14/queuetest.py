@@ -27,12 +27,27 @@ def dict_to_2Darray(dict_data):
     
 normal_list = dict_to_2Darray(json.loads(items['normal']))
 print(normal_list)
-# STARTUP_SIGNUP_TABLE = 'Store_Info'
-# AWS_REGION = 'us-east-1'
-# dynamodb = boto3.resource(
-#     'dynamodb', region_name=AWS_REGION)
-# table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
-# res = table.scan()
+STARTUP_SIGNUP_TABLE = 'Store_Info'
+AWS_REGION = 'us-east-1'
+dynamodb = boto3.resource(
+    'dynamodb', region_name=AWS_REGION)
+table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
+key = 'TEST.jpg'
+key = key[:-4]
+print(key)
+num = 30
+table.update_item(
+        Key={
+            'store': key,
+        },
+        UpdateExpression="set person_now = :pn",
+        ExpressionAttributeValues={
+            ':pn': num,
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    
+# # res = table.scan()
 # # print(res['Items'])
 # store_info_list = res['Items']
 # for store in store_info_list:
@@ -49,7 +64,6 @@ print(normal_list)
 # print(item['tag'])
 # print(type(item['tag']))
 # print(item['tag'][0])
-
 # dynamodb = boto3.resource(
 #         'dynamodb', region_name=AWS_REGION)
 # table = dynamodb.Table('Store_List')

@@ -23,7 +23,10 @@
 </p>
 {% if filename %}
 <div>
-    <img src="{{ url_for('display_image', filename=filename) }}">
+    <img src="{{object_url}}{{filename}}"style="width: 100%; ">
+    <br/>
+    <br/>
+    <br/>
 </div>
 {% endif %}
 

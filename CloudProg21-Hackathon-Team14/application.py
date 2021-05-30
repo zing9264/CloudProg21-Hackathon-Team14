@@ -158,10 +158,11 @@ def storeimage_upload(storename):
         if file and allowed_file(file.filename):
             filename = storename+'.jpg'
             upload_to_S3(file,filename)
+            print(filename)
             # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
-            return flask.render_template('upload_image.html', filename=filename ,storename=storename, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', filename=filename ,storename=storename,object_url=object_url, flask_debug=application.debug)
         else:
             flash('Allowed image types are - png, jpg, jpeg')
             return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
@@ -253,7 +254,8 @@ def signup_data_parse(data, item_list):
     storeinfo['contact'] = json.dumps(contact)
     storeinfo['normal'] = json.dumps(normal)
     storeinfo['discount'] = json.dumps(discount)
-
+    # set default person
+    storeinfo['person_now'] = 0
     table = dynamodb.Table(application.config['STORE_INFO'])
     response = table.put_item(Item=storeinfo)
     print("store info", response)
