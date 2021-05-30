@@ -77,7 +77,7 @@ def loginpage():
     remember = True if request.form.get('remember') else False
     # print(id)
     user = check_user(id)
-    if user is not None and password ==user['password']:
+    if user is not None and password == user['password']:
         curr_user = User()
         curr_user.id = id
         print(curr_user)
@@ -88,8 +88,8 @@ def loginpage():
             #  如果使用者沒有該url權限，那就reject掉。
             return 'Bad Boy!!'
         return redirect(next or url_for('welcome'))
-    else:
-        flash('Wrong username or password!')
+    # elif user is not None :
+    #     flash('Wrong username or password!')
         
     return flask.render_template('login.html', flask_debug=application.debug)
 def next_is_valid(url):
@@ -173,12 +173,20 @@ def display_image(filename):
 def storeupdate_storepage(storename):
     userinfo = check_user(current_user.id)
     print(userinfo)
-    # if userinfo['storename'] == storename:
-    #     return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
-    # else:
-    #     flash('This is not your store !!!')
-    #     return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
-    return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
+    storeinfo =get_DBitem(application.config['STORE_INFO'],storename)
+    contact = json.loads(storeinfo['contact'])   # dict
+    # turn dict to 2D array in order to use jinja to show the info in DB
+    normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
+    discount = dict_to_2Darray(json.loads(storeinfo['discount']))
+    if userinfo['storename'] == storename:
+        return flask.render_template('update_storepage.html', info = storeinfo,
+                                contact = contact,
+                                normal = normal,
+                                discount = discount, flask_debug=application.debug)
+    else:
+        flash('This is not your store !!!')
+        return redirect(url_for('storepage',storename=storename))
+    # return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
 
 #更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
 @application.route('/storepage/<storename>/updateFormPost')
@@ -251,7 +259,7 @@ def signup_data_parse(data, item_list):
 @application.route('/test')
 def test():
     store_list = get_all_store_DBitem(application.config['STORE_INFO'])
-    storename = 'KFC'
+    storename = '87店'
     storeinfo =get_DBitem(application.config['STORE_INFO'],storename)
     contact = json.loads(storeinfo['contact'])   # dict
     normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
