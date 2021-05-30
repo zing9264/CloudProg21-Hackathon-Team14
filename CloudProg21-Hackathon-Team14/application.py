@@ -208,8 +208,8 @@ def update_DBdata(storename):
     for item in request.form:
         data[item] = request.form[item]
         item_list.append(item)
-    print(data)
-    print(item_list)
+    # print(data)
+    # print(item_list)
     update_data_parse(data, item_list , storename)
     flash('UPDATE SUCCESS')
     return redirect(url_for('storepage',storename=storename))
@@ -271,6 +271,7 @@ def signup_data_parse(data, item_list):
 
 
 def update_data_parse(data, item_list,storename):
+    print("parse HI: ",data)
     dynamodb = boto3.resource(
         'dynamodb', region_name=application.config['AWS_REGION'])
     normal_count = []
@@ -281,8 +282,12 @@ def update_data_parse(data, item_list,storename):
         elif 'discount' in item and 'price' not in item:
             discount_count.append(item)
     # store info table
+    print("change",data['inputperson_now'])
     storeinfo = {'store': storename,
-                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
+                 'person_max': data['inputperson_max'], 
+                 'person_now': data['inputperson_now'],
+                 'tag': data['tag'].split()}
+    print("change ",storeinfo)
     contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
     normal = {}
     discount = {}
