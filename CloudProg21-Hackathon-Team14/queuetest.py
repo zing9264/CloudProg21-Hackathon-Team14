@@ -9,7 +9,7 @@ import json
 
 # print(response.get('MessageId'))
 # print(response.get('MD5OfMessageBody'))
-item = {
+items = {
     'store': 'KFC',
     'person_max': 20,
     'person_now': 15,
@@ -18,16 +18,30 @@ item = {
     'discount': '{"A":199 } ',
     'tag': ['FastFood','Fried']
 }
-STARTUP_SIGNUP_TABLE = 'Store_Info'
-AWS_REGION = 'us-east-1'
-dynamodb = boto3.resource(
-    'dynamodb', region_name=AWS_REGION)
-table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
-response = table.put_item(Item=item)
+def dict_to_2Darray(dict_data):
+    array_2D =[]
+    for item in dict_data:
+        a = [item ,dict_data[item]]
+        array_2D.append(a)
+    return array_2D
+    
+normal_list = dict_to_2Darray(json.loads(items['normal']))
+print(normal_list)
+# STARTUP_SIGNUP_TABLE = 'Store_Info'
+# AWS_REGION = 'us-east-1'
+# dynamodb = boto3.resource(
+#     'dynamodb', region_name=AWS_REGION)
+# table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
+# res = table.scan()
+# # print(res['Items'])
+# store_info_list = res['Items']
+# for store in store_info_list:
+#     print(store)
+# response = table.put_item(Item=item)
 # response = table.delete_item(Key = {'store':'Bar'})
 
-res = table.get_item(Key={'store': 'KFC'})
-item = res['Item']
+# res = table.get_item(Key={'store': 'KFC'})
+# item = res['Item']
 # print(item['contact'])
 # print(type(item['contact']))
 # print(json.loads(item['contact']))
@@ -36,12 +50,12 @@ item = res['Item']
 # print(type(item['tag']))
 # print(item['tag'][0])
 
-dynamodb = boto3.resource(
-        'dynamodb', region_name=AWS_REGION)
-table = dynamodb.Table('Store_List')
-res = table.get_item(Key={'id': 'HotPot'})
-print(res['Item'])
-print(type(res['Item']))
+# dynamodb = boto3.resource(
+#         'dynamodb', region_name=AWS_REGION)
+# table = dynamodb.Table('Store_List')
+# res = table.get_item(Key={'id': 'HotPot'})
+# print(res['Item'])
+# print(type(res['Item']))
 # create S3
 # S3 = 'nthu-2021-team14-hackathon'
 # s3 = boto3.client('s3')

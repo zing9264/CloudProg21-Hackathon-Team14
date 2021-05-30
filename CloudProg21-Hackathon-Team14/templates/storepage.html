@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %} {{storename}} {% endblock %} {% block header %}
+{% extends "base.html" %} {% block title %} {{info.store}} {% endblock %} {% block header %}
 <ul class="nav nav-pills justify-content-end">
     <li class="nav-item">
         <a class="nav-link " href="/">Home</a>
@@ -61,16 +61,15 @@
 
 
 
-
 <div class="row" style="margin-bottom: 1rem;">
-    <image src="{{ url_for('static', filename='image/麥當勞酒吧.jpg') }}" style="width: 100%; "></image>
+    <!-- <image src="{{ url_for('static', filename='image/{{info.store}}.jpg') }}" style="width: 100%; "></image> -->
 </div>
 <div class="row text-center" style="margin-bottom: 1rem;">
     <div class="col-sm-6">
-        <a class="btn btn-primary btn-lg" href="/storepage/{{storename}}/upload_file_page" role="button">更新照片</a>
+        <a class="btn btn-primary btn-lg" href="/storepage/{{info.store}}/upload_file_page" role="button">更新照片</a>
     </div>
     <div class="col-sm-6">
-        <a class="btn btn-primary btn-lg" href="/storepage/{{storename}}/update_storepage" role="button">更新詳細資料</a>
+        <a class="btn btn-primary btn-lg" href="/storepage/{{info.store}}/update_storepage" role="button">更新詳細資料</a>
     </div>
 </div>
 
@@ -87,7 +86,7 @@
                         <span>店名</span>
                     </div>
                     <div class="price-line ">
-                        <span>麥當勞酒吧</span>
+                        <span>{{info.store}}</span>
                     </div>
                 </div>
             </div>
@@ -99,7 +98,7 @@
                         <span>現場人數</span>
                     </div>
                     <div class="price-line ">
-                        <span>10/30</span>
+                        <span>{{info.person_now}}/{{info.person_max}}</span>
                     </div>
                 </div>
             </div>
@@ -111,12 +110,11 @@
                         <span>餐廳電話</span>
                     </div>
                     <div class="price-line ">
-                        <span>0989744940</span>
+                        <span>{{contact.phone}}</span>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="col-sm-8 ">
             <div class="card menu-card ">
                 <div class="item-root ">
@@ -124,7 +122,7 @@
                         <span>地址</span>
                     </div>
                     <div class="price-line ">
-                        <span>XX區XX路XX號</span>
+                        <span>{{contact.address}}</span>
                     </div>
                 </div>
             </div>
@@ -136,8 +134,9 @@
                         <span>標籤</span>
                     </div>
                     <div>
-                        <span class="badge badge-pill badge-info "> 漢堡 </span>
-                        <span class="badge badge-pill badge-info "> 酒 </span>
+                        {% for tag in info.tag %}
+                        <span class="badge badge-pill badge-info "> {{tag}} </span>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -149,73 +148,27 @@
 
 <div class="row list-title ">
     <div class="col-12 ">
-        <h2>一般餐點</h2>
+        <h2>一般套餐</h2>
     </div>
 </div>
 
 
 <div id="normal-menu-list ">
     <div class="row ">
+        {% for meal in normal %}
         <div class="col-sm-6 ">
             <div class="card menu-card ">
                 <div class="item-root ">
                     <div class="dish-name ">
-                        <span>麥脆雞</span>
+                        <span>{{ meal[0] }}</span>
                     </div>
                     <div class="price-line ">
-                        <span>$ 50</span>
+                        <span>{{ meal[1] }} </span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>麥脆雞</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>麥脆雞</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>麥脆雞</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>麥脆雞</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -229,57 +182,21 @@
 
 <div id="discount-menu-list ">
     <div class="row ">
+        {% for meal in discount %}
         <div class="col-sm-6 ">
             <div class="card menu-card ">
                 <div class="item-root ">
                     <div class="dish-name ">
-                        <span>A套餐:麥脆雞+酒</span>
+                        <span>{{ meal[0] }}</span>
                     </div>
                     <div class="price-line ">
-                        <span>$ 300</span>
+                        <span>{{ meal[1] }}</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>B套餐:酒+薯條</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 150</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>C套餐:酒+薯條+漢堡</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 ">
-            <div class="card menu-card ">
-                <div class="item-root ">
-                    <div class="dish-name ">
-                        <span>D套餐:薯條+漢堡</span>
-                    </div>
-                    <div class="price-line ">
-                        <span>$ 50</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
-
-
 
 {% endblock %}

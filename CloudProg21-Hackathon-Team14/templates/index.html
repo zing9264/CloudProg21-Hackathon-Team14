@@ -43,42 +43,35 @@
                 </div>
             </div>
         </div>
+        {% for store in stores %}
         <div class="col-sm-6">
-            <div class="card store-card ">
-                <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+            <div class="card store-card">
+                <div class=" card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="card-title" id='storeName-1'>{{ store.store }}</h3>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="card-text">人數: {{ store.person_now }} / {{ store.person_max }} </p>
+                                    <p class="card-text">距離: 1.5km </p>
+                                    <p class="card-text">TAG:
+                                        {% for tag in store.tag %}
+                                        <span class="badge badge-pill badge-info"> {{tag}} </span> 
+                                        <!-- <span class="badge badge-pill badge-info"> 酒 </span> -->
+                                        {% endfor %}
+                                    </p>
+                                    <a href="/storepage/{{ store.store }}" class="btn btn-primary">詳細資訊</a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <!-- <image src="{{ url_for('static', filename='image/麥當勞酒吧.jpg') }}" style="width: 100%; "></image> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="store-card card">
-                <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6">
-            <div class="card store-card ">
-                <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6">
-            <div class="card store-card ">
-                <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
