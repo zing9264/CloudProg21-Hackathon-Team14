@@ -1,0 +1,4 @@
+*.zip
+Dockerfile
+venv/
+README.md

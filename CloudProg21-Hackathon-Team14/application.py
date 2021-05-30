@@ -90,7 +90,6 @@ def loginpage():
         return redirect(next or url_for('welcome'))
     # elif user is not None :
     #     flash('Wrong username or password!')
-        
     return flask.render_template('login.html', flask_debug=application.debug)
 def next_is_valid(url):
     return True
@@ -456,7 +455,7 @@ def check_or_create():
     except:
         print("init DB item fail")
 
-# check_or_create()
+check_or_create()
 
 
 if __name__ == '__main__':
