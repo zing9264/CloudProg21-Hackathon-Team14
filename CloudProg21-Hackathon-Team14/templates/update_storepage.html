@@ -78,7 +78,7 @@
                             <span>店名</span>
                         </div>
                         <div class="price-line ">
-                            <span>{{storename}}</span>
+                            <span>{{info.store}}</span>
                         </div>
                     </div>
                 </div>
@@ -90,9 +90,9 @@
                             <span>現場人數</span>
                         </div>
                         <div class=" ">
-                            <input style="width: 30%;" value="10" />
+                            <input style="width: 30%;" value="{{info.person_now}}" />
                             <span>/</span>
-                            <input style="width: 30%;" value="30" />
+                            <input style="width: 30%;" value="{{info.person_max}}" />
                         </div>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                             <span>餐廳電話</span>
                         </div>
                         <div class="price-line ">
-                            <input value="0989744940" />
+                            <input value="{{contact.phone}}" />
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                             <span>地址</span>
                         </div>
                         <div class="price-line ">
-                            <input value="XX區XX路XX號" />
+                            <input value="{{contact.address}}" />
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                             <span>標籤</span>
                         </div>
                         <div>
-                            <input type="text" value="漢堡 酒">
+                            <input type="text" {% for tag in info.tag %} value="{{tag}}" {% endfor %}>
                         </div>
                     </div>
                 </div>
@@ -148,18 +148,19 @@
 
     <div id="normal-menu-list ">
         <div class="row ">
+            {% for meal in normal %}
             <div class="col-sm-6 ">
                 <div class="card menu-card ">
                     <div class="item-root ">
                         <div class="row " style=" margin-bottom: 0.5rem; ">
                             <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
+                                <input style="width: 100%;" value="{{ meal[0] }}">
                             </div>
                         </div>
                         <div class="row">
                             <div class=" col-sm-6">
                                 <span>$</span>
-                                <input style="width: 30%;" value="50">
+                                <input style="width: 30%;" value="{{ meal[1] }}">
                             </div>
                             <div class=" col-sm-6 text-right">
                                 <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
@@ -169,69 +170,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 ">
-                <div class="card menu-card ">
-                    <div class="item-root ">
-                        <div class="row " style=" margin-bottom: 0.5rem; ">
-                            <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class=" col-sm-6">
-                                <span>$</span>
-                                <input style="width: 30%;" value="50">
-                            </div>
-                            <div class=" col-sm-6 text-right">
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-danger">-</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 ">
-                <div class="card menu-card ">
-                    <div class="item-root ">
-                        <div class="row " style=" margin-bottom: 0.5rem; ">
-                            <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class=" col-sm-6">
-                                <span>$</span>
-                                <input style="width: 30%;" value="50">
-                            </div>
-                            <div class=" col-sm-6 text-right">
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-danger">-</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 ">
-                <div class="card menu-card ">
-                    <div class="item-root ">
-                        <div class="row " style=" margin-bottom: 0.5rem; ">
-                            <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class=" col-sm-6">
-                                <span>$</span>
-                                <input style="width: 30%;" value="50">
-                            </div>
-                            <div class=" col-sm-6 text-right">
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-danger">-</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -245,18 +184,19 @@
 
     <div id="discount-menu-list ">
         <div class="row ">
+            {% for meal in discount %}
             <div class="col-sm-6 ">
                 <div class="card menu-card ">
                     <div class="item-root ">
                         <div class="row " style=" margin-bottom: 0.5rem; ">
                             <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
+                                <input style="width: 100%;" value="{{ meal[0] }}">
                             </div>
                         </div>
                         <div class="row">
                             <div class=" col-sm-6">
                                 <span>$</span>
-                                <input style="width: 30%;" value="50">
+                                <input style="width: 30%;" value="{{ meal[1] }}">
                             </div>
                             <div class=" col-sm-6 text-right">
                                 <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
@@ -266,48 +206,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 ">
-                <div class="card menu-card ">
-                    <div class="item-root ">
-                        <div class="row " style=" margin-bottom: 0.5rem; ">
-                            <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class=" col-sm-6">
-                                <span>$</span>
-                                <input style="width: 30%;" value="50">
-                            </div>
-                            <div class=" col-sm-6 text-right">
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-danger">-</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 ">
-                <div class="card menu-card ">
-                    <div class="item-root ">
-                        <div class="row " style=" margin-bottom: 0.5rem; ">
-                            <div class=" col-sm-12">
-                                <input style="width: 100%;" value="麥脆雞">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class=" col-sm-6">
-                                <span>$</span>
-                                <input style="width: 30%;" value="50">
-                            </div>
-                            <div class=" col-sm-6 text-right">
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
-                                <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-danger">-</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 

@@ -59,7 +59,13 @@
     }
 </style>
 
-
+{% with messages = get_flashed_messages() %}            {% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}         {% endwith %}
 
 <div class="row" style="margin-bottom: 1rem;">
     <!-- <image src="{{ url_for('static', filename='image/{{info.store}}.jpg') }}" style="width: 100%; "></image> -->
