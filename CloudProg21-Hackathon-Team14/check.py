@@ -1,5 +1,4 @@
 import boto3
-
 # Receive the message from SQS Tutorial:https://boto3.amazonaws.com/v1/documentation/api/latest/guide/sqs-example-sending-receiving-msgs.html
 
 # Create SQS client
