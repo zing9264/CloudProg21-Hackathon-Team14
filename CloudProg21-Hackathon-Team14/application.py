@@ -106,10 +106,16 @@ def logout():
 # DEFINE S3  source url
 object_url = "https://"+application.config['S3'] +".s3.amazonaws.com/"
 # #這塊需要從資料庫撈資料 並用jinja2 渲染到前端
+
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
     store_list = get_all_store_DBitem(application.config['STORE_INFO'])
+    print(store_list)
+    for i in range(len(store_list)):
+        store_list[i]['contact']=json.loads(store_list[i]['contact'])
+        print(store_list[i]['contact']['address'])
+
     return flask.render_template('index.html', theme=theme, flask_debug=application.debug , stores = store_list, object_url=object_url)
 
 
