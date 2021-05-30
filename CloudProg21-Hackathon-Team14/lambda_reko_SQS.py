@@ -9,26 +9,21 @@ SQS_URL = "https://sqs.us-east-1.amazonaws.com/486184014670/hackathonQueue"
 s3 = boto3.client('s3')
 def detect_labels(bucket, key):
     client=boto3.client('rekognition')
-    response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':key}}, MaxLabels=1) # 10->1
-    
+    response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':key}}) 
+
     print('---Start---')
     print('Detected labels for ' + key)
-    print()
     for label in response['Labels']:
         c =0
         print ("Label: " + label['Name'])
         for instance in label['Instances']:
             c+=1
-            # print ("  Bounding box")
-            # print ("    Top: " + str(instance['BoundingBox']['Top']))
-            # print ("    Left: " + str(instance['BoundingBox']['Left']))
-            # print ("    Width: " +  str(instance['BoundingBox']['Width']))
-            # print ("    Height: " +  str(instance['BoundingBox']['Height']))
-            # print ("  Confidence: " + str(instance['Confidence']))
-            # print()
-        print("Number of Person: ", c)
+        if label['Name']=="Person":
+            print("Number of Person: ", c)
+            return c
     print('---END---')
-    return c
+    return 0
+
 
 # send to SQS Tutorial: https://www.javacodemonk.com/python-send-event-from-aws-lambda-to-aws-sqs-a5f299dc
 def send_sqs_message(sqs_queue_url, msg_body):
