@@ -211,6 +211,8 @@ def update_DBdata(storename):
         item_list.append(item)
     print(data)
     print(item_list)
+    update_data_parse(data, item_list , storename)
+    flash('UPDATE SUCCESS')
     return redirect(url_for('storepage',storename=storename))
 
 #註冊帳號與所有資料
@@ -246,6 +248,41 @@ def signup_data_parse(data, item_list):
     print("user info", response)
     # store info table
     storeinfo = {'store': data['inputstore'],
+                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
+    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
+    normal = {}
+    discount = {}
+    for i, item in enumerate(normal_count):
+        pricename = 'normal-price-'+str(i+1)
+        normal[data[item]] = data[pricename]
+    for i, item in enumerate(discount_count):
+        pricename = 'discount-price-'+str(i+1)
+        discount[data[item]] = data[pricename]
+    tag = data['tag'].split()
+    storeinfo['contact'] = json.dumps(contact)
+    storeinfo['normal'] = json.dumps(normal)
+    storeinfo['discount'] = json.dumps(discount)
+    # set default person
+    storeinfo['person_now'] = 0
+    table = dynamodb.Table(application.config['STORE_INFO'])
+    response = table.put_item(Item=storeinfo)
+    print("store info", response)
+
+    return
+
+
+def update_data_parse(data, item_list,storename):
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    normal_count = []
+    discount_count = []
+    for item in item_list:
+        if 'normal' in item and 'price' not in item:
+            normal_count.append(item)
+        elif 'discount' in item and 'price' not in item:
+            discount_count.append(item)
+    # store info table
+    storeinfo = {'store': storename,
                  'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
     contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
     normal = {}
