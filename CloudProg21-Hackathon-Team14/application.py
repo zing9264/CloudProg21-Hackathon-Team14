@@ -103,12 +103,14 @@ def logout():
     return redirect(url_for('welcome'))
 # ============================== login =================================
 
+# DEFINE S3  source url
+object_url = "https://"+application.config['S3'] +".s3.amazonaws.com/"
 # #這塊需要從資料庫撈資料 並用jinja2 渲染到前端
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
     store_list = get_all_store_DBitem(application.config['STORE_INFO'])
-    return flask.render_template('index.html', theme=theme, flask_debug=application.debug , stores = store_list)
+    return flask.render_template('index.html', theme=theme, flask_debug=application.debug , stores = store_list, object_url=object_url)
 
 
 #店家詳細資料這塊需要傳入所有資料庫變數，用jinja2 render出來
@@ -125,6 +127,7 @@ def storepage(storename):
                                 info = storeinfo,
                                 contact = contact,
                                 normal = normal,
+                                object_url = object_url,
                                 discount = discount)
 
  
@@ -154,7 +157,8 @@ def storeimage_upload(storename):
 
         if file and allowed_file(file.filename):
             filename = storename+'.jpg'
-            file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
+            upload_to_S3(file,filename)
+            # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
             return flask.render_template('upload_image.html', filename=filename ,storename=storename, flask_debug=application.debug)
@@ -325,9 +329,9 @@ def parse_db_item(storename):
     tag = item['tag']  # list
 
 
-def upload_to_S3(image):
+def upload_to_S3(image,name):
     s3 = boto3.client('s3')
-    s3.upload_file(image)
+    s3.upload_fileobj(image,application.config['S3'],name,ExtraArgs={'ACL':'public-read', 'ContentType': 'image/jpeg'})
     return
 
 

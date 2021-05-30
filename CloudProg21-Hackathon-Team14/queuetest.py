@@ -18,17 +18,17 @@ items = {
     'discount': '{"A":199 } ',
     'tag': ['FastFood','Fried']
 }
-def dict_to_2Darray(dict_data):
-    array_2D =[]
-    for item in dict_data:
-        a = [item ,dict_data[item]]
-        array_2D.append(a)
-    return array_2D
+# def dict_to_2Darray(dict_data):
+#     array_2D =[]
+#     for item in dict_data:
+#         a = [item ,dict_data[item]]
+#         array_2D.append(a)
+#     return array_2D
     
-normal_list = dict_to_2Darray(json.loads(items['normal']))
-print(normal_list)
-# STARTUP_SIGNUP_TABLE = 'Store_Info'
-# AWS_REGION = 'us-east-1'
+# normal_list = dict_to_2Darray(json.loads(items['normal']))
+# print(normal_list)
+STARTUP_SIGNUP_TABLE = 'Store_Info'
+AWS_REGION = 'us-east-1'
 # dynamodb = boto3.resource(
 #     'dynamodb', region_name=AWS_REGION)
 # table = dynamodb.Table(STARTUP_SIGNUP_TABLE)
@@ -57,8 +57,12 @@ print(normal_list)
 # print(res['Item'])
 # print(type(res['Item']))
 # create S3
-# S3 = 'nthu-2021-team14-hackathon'
-# s3 = boto3.client('s3')
+S3 = 'nthu-2021-team14-hackathon'
+s3 = boto3.client('s3')
+# res = s3.get_object(Bucket=S3,Key = '1500test.jpg')
+object_url = "https://nthu-2021-team14-hackathon.s3.amazonaws.com/{1}".format(S3,'1500test.jpg')
+
+print(object_url)
 # response = s3.list_buckets()
 # isbucketExist=False
 # for bucket in response['Buckets']:
