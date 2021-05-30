@@ -1,19 +1,16 @@
+import os
 import json
-import urllib.parse
 import boto3
 import logging
-import os
+import urllib.parse
 
-"""
-AWS rekognition 
-- detect_labels 搬過來用
-- 新增變數c 去算總人數
-"""
+# AWS rekognition: detect_labels 搬過來用 (不用face是因為如果相片中背對的人也可以算到人數)
 s3 = boto3.client('s3')
-def detect_labels(key, bucket):
+def detect_labels(bucket, key):
     client=boto3.client('rekognition')
     response = client.detect_labels(Image={'S3Object':{'Bucket':bucket,'Name':key}}, MaxLabels=1) # 10->1
-    print('-----')
+    
+    print('---Start---')
     print('Detected labels for ' + key)
     print()
     for label in response['Labels']:
@@ -29,34 +26,35 @@ def detect_labels(key, bucket):
             # print ("  Confidence: " + str(instance['Confidence']))
             # print()
         print("Number of Person: ", c)
-
-    print('-----')
+    print('---END---')
     return c
 
-# send to SQS https://www.javacodemonk.com/python-send-event-from-aws-lambda-to-aws-sqs-a5f299dc
-
+# send to SQS Tutorial: https://www.javacodemonk.com/python-send-event-from-aws-lambda-to-aws-sqs-a5f299dc
 def send_sqs_message(sqs_queue_url, msg_body):
     sqs_client = boto3.client('sqs')
-    sqs_queue_url = 'https://sqs.us-east-1.amazonaws.com/662802416147/Num' # 先自己測試一下SQS
+    msg = sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=json.dumps(msg_body)) 
     
-    msg = sqs_client.send_message(QueueUrl=sqs_queue_url,
-                                      MessageBody=json.dumps(msg_body)) 
     return msg
 
 # 觸發 lambda
 def lambda_handler(event, context):
-
+    print(event)
+    print('-')
+    
     # Get the object from the event and show its content type
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     
-    try:
-        response = detect_labels(key, bucket)
-        print(response)
-        send_sqs_message('https://sqs.us-east-1.amazonaws.com/662802416147/Num', response)
-        return response
+    # try:
+    # # response = detect_labels(key, bucket)
+    response = detect_labels(bucket, key)
+    print(response)
+    
+    msg = send_sqs_message('https://sqs.us-east-1.amazonaws.com/662802416147/N', response) # 改一下要接收的SQS url 且SQS policy 要開
+    # print(msg)
 
-    except Exception as e:
-        print(e)
-        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
-        raise e
+    # except Exception as e:
+    #     print(e)
+    #     print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
+    #     raise e
+    
