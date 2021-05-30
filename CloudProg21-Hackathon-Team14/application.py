@@ -190,7 +190,7 @@ def storeupdate_storepage(storename):
     normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
     discount = dict_to_2Darray(json.loads(storeinfo['discount']))
     if userinfo['storename'] == storename:
-        return flask.render_template('update_storepage.html', info = storeinfo,
+        return flask.render_template('update_storepage.html',storename=storename, info = storeinfo,
                                 contact = contact,
                                 normal = normal,
                                 discount = discount, flask_debug=application.debug)
@@ -200,7 +200,7 @@ def storeupdate_storepage(storename):
     # return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
 
 #更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
-@application.route('/storepage/<storename>/updateFormPost')
+@application.route('/storepage/<storename>/updateFormPost' ,methods=['POST'])
 @login_required
 def update_DBdata(storename):
     update_data = dict()
@@ -211,7 +211,7 @@ def update_DBdata(storename):
         item_list.append(item)
     print(data)
     print(item_list)
-    return flask.render_template('storepage.html', storename=storename, flask_debug=application.debug)
+    return redirect(url_for('storepage',storename=storename))
 
 #註冊帳號與所有資料
 @application.route('/signupFormPost', methods=['POST'])

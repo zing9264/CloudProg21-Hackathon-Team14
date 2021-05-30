@@ -90,9 +90,9 @@
                             <span>現場人數</span>
                         </div>
                         <div class=" ">
-                            <input style="width: 30%;" value="{{info.person_now}}" />
+                            <input name="inputperson_now" style="width: 30%;" value="{{info.person_now}}" />
                             <span>/</span>
-                            <input style="width: 30%;" value="{{info.person_max}}" />
+                            <input name="inputperson_max" style="width: 30%;" value="{{info.person_max}}" />
                         </div>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                             <span>餐廳電話</span>
                         </div>
                         <div class="price-line ">
-                            <input value="{{contact.phone}}" />
+                            <input name="inputphone" id="inputphone" value="{{contact.phone}}" />
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                             <span>地址</span>
                         </div>
                         <div class="price-line ">
-                            <input value="{{contact.address}}" />
+                            <input name="inputAddress" id="inputAddress" value="{{contact.address}}" />
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                             <span>標籤</span>
                         </div>
                         <div>
-                            <input type="text" {% for tag in info.tag %} value="{{tag}}" {% endfor %}>
+                            <input id="tag" name="tag" type="text" {% for tag in info.tag %} value="{{tag}}" {% endfor %}>
                         </div>
                     </div>
                 </div>
@@ -154,13 +154,13 @@
                     <div class="item-root ">
                         <div class="row " style=" margin-bottom: 0.5rem; ">
                             <div class=" col-sm-12">
-                                <input style="width: 100%;" value="{{ meal[0] }}">
+                                <input id="normal-{{ loop.index }}" name="normal-{{ loop.index }}" style="width: 100%;" value="{{ meal[0] }}">
                             </div>
                         </div>
                         <div class="row">
                             <div class=" col-sm-6">
                                 <span>$</span>
-                                <input style="width: 30%;" value="{{ meal[1] }}">
+                                <input id="normal-price-{{ loop.index }}" name="normal-price-{{ loop.index }}" style="width: 30%;" value="{{ meal[1] }}">
                             </div>
                             <div class=" col-sm-6 text-right">
                                 <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
@@ -190,13 +190,13 @@
                     <div class="item-root ">
                         <div class="row " style=" margin-bottom: 0.5rem; ">
                             <div class=" col-sm-12">
-                                <input style="width: 100%;" value="{{ meal[0] }}">
+                                <input name="discount-{{ loop.index }}" id="discount-{{ loop.index }}" style="width: 100%;" value="{{ meal[0] }}">
                             </div>
                         </div>
                         <div class="row">
                             <div class=" col-sm-6">
                                 <span>$</span>
-                                <input style="width: 30%;" value="{{ meal[1] }}">
+                                <input name="discount-price-{{ loop.index }}" id="discount-price-{{ loop.index }}" style="width: 30%;" value="{{ meal[1] }}">
                             </div>
                             <div class=" col-sm-6 text-right">
                                 <button style="width: 25px; height: 25px; padding: 0; " type="button" class="btn btn-primary">+</button>
