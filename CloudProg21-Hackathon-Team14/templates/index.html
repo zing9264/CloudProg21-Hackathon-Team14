@@ -118,29 +118,6 @@
 
 <div class="storelist">
     <div class="row">
-        <div class="col-sm-6">
-            <div class="card store-card">
-                <div class=" card-body">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <h3 class="card-title" id='storeName-0'>麥當勞酒吧</h3>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <p class="card-text">人數: 5 / 30 </p>
-                                    <p class="card-text">距離: 1.5km </p>
-                                    <p class="card-text">TAG:<span class="badge badge-pill badge-info"> 漢堡 </span> <span class="badge badge-pill badge-info"> 酒 </span>
-                                    </p>
-                                    <a href="/storepage/麥當勞酒吧" class="btn btn-primary">詳細資訊</a>
-                                </div>
-                                <div class="col-sm-6">
-                                    <image src="{{ url_for('static', filename='image/麥當勞酒吧.jpg') }}" style="width: 100%; "></image>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         {% for store in stores %}
         <div class="col-sm-6">
             <div class="card store-card">
