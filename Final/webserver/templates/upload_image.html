@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block title %} {{storename}} 上傳圖片{% endblock %} {% block header %}
+<ul class="nav nav-pills justify-content-end">
+    <li class="nav-item">
+        <a class="nav-link " href="/">Home</a>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link" href="/login">店家登入</a></li>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link" href="/sign_up">餐廳註冊</a></li>
+    </li>
+</ul>
+{% endblock %} {% block main %}
+
+<p>
+    {% with messages = get_flashed_messages() %}            {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}         {% endwith %}
+</p>
+{% if filename %}
+<div>
+    <img src="{{object_url}}{{filename}}"style="width: 100%; ">
+    <br/>
+    <br/>
+    <br/>
+</div>
+{% endif %}
+
+<form method="post" action="/storepage/{{storename}}/image_upload" enctype='multipart/form-data'>
+    <div class="row">
+        <div class="col-10">
+            <p>
+                <input type="file" name="file" class="form-control" autocomplete="off" required>
+            </p>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 1rem;">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">上傳照片</button>
+        </div>
+        <div class="col-6">
+            <a class="btn btn-primary" href="/storepage/{{storename}}" role="button">返回</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

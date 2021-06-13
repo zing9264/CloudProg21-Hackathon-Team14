@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block title %} CloudProg21-Hackathon-Team14 {% endblock %} {% block header %}
+<ul class="nav nav-pills justify-content-end">
+    <li class="nav-item">
+        <a class="nav-link active" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link" href="/login">店家登入</a></li>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link " href="/sign_up">餐廳註冊</a></li>
+    </li>
+</ul>
+{% endblock %} {% block main %}
+
+
+<style type="text/css">
+    /* Set the size of the div element that contains the map */
+    
+    #map {
+        height: 400px;
+        /* The height is 400 pixels */
+        width: 100%;
+        /* The width is the width of the web page */
+    }
+</style>
+
+
+<div>
+    <div style="width: 100%; margin-bottom: 1rem;" id="map"></div>
+</div>
+<hr class="my-3 ">
+
+<!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3J2tSWhEOApCP4o3PvtY7EftwlzLh-Tk&callback=initMap&libraries=places,geometry&channel=GMPSB_locatorplus_v2_cABCDE" async defer></script>
+
+<div class="storelist">
+    <div class="row">
+        {% for delevery in deleverys %}
+        <div class="col-sm-12">
+            <div class="card store-card">
+                <div class=" card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="card-title" id='storeName-{{ loop.index }}'>{{ delevery.id }}</h3>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p class="card-text">商品名稱: {{ delevery.name }} </p>
+                                    <p class="card-text">商品名稱: {{ delevery.productname }} </p>
+                                    <p class="card-text">地址: {{ delevery.address}} </p>
+                                    <p class="card-text">運送狀態: {{ delevery.condition }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
