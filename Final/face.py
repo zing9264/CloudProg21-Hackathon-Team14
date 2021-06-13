@@ -16,7 +16,7 @@ def send_sqs_message(sqs_queue_url, msg_body):
 
 BUCKET = "image-final"
 KEY_SOURCE = "ITZY(P).jpg"
-KEY_TARGET = "TRY.JPG"
+KEY_TARGET = "IITZYYY.jpg"
 
 # Tutorial https://gist.github.com/alexcasalboni/0f21a1889f09760f8981b643326730ff
 
@@ -44,68 +44,29 @@ source_face, matches = compare_faces(BUCKET, KEY_SOURCE, BUCKET, KEY_TARGET)
 print("Source Face:", KEY_SOURCE)
 print("---")
 
+
+
 c =0
+mess = {}
 for match in matches:
     c+=1
     print("Number ", c, "similar face:")
-    # print("Target Face ({Confidence}%)".format(**match['Face']))
     print("Target Face", KEY_TARGET)
     print("Similarity : {}%".format(match['Similarity']))
-    send_sqs_message(SQS_URL, match['Similarity'])
-
+    mess.update({c: match['Similarity']})
     print("---")
 
+print(mess)
 
-
-
-
-
-
-
-#Tutorial https://github.com/awsdocs/amazon-rekognition-developer-guide/blob/master/doc_source/compare-faces-console.md
 '''
-def compare_faces(sourceFile, targetFile):
+output:
 
-    client=boto3.client('rekognition')
-    # imageSource=urllib.urlopen(sourceFile)
-    # imageTarget=urllib.urlopen(targetFile)
-
-   
-    imageSource=open(sourceFile)
-    imageTarget=open(targetFile)
-
-    response=client.compare_faces(SimilarityThreshold=80,
-                                  SourceImage={'Bytes': imageSource.read()},
-                                  TargetImage={'Bytes': imageTarget.read()})
-
-    
-    for faceMatch in response['FaceMatches']:
-        position = faceMatch['Face']['BoundingBox']
-        similarity = str(faceMatch['Similarity'])
-        print('The face at ' +
-              str(position['Left']) + ' ' +
-              str(position['Top']) +
-              ' matches with ' + similarity + '% confidence')
-    imageSource.close()
-    imageTarget.close()     
-    return len(response['FaceMatches'])     
-
-def main():
-
-    s3 = boto3.resource('s3', region_name='us-east-1')
-    bucket = s3.Bucket('image-final')
-
-    source_file='https://image-final.s3.amazonaws.com/ITZY(P).jpg'# Ref (目標)
-    target_file='https://image-final.s3.amazonaws.com/ITZY(Group).jpg'# Comparison (測的)
-
-    source_file = urllib.request.urlretrieve(source_file, 'source.png')
-    img = Image.open('source.png')
-    img.show()
-    target_file = urllib.request.urlretrieve(target_file, 'target.png')
-    
-    face_matches=compare_faces(source_file, target_file)
-    print("Face matches: " + str(face_matches))
-
-if __name__ == "__main__":
-    main()
+(cloud) D:\Cloud-Programming\CloudProg21-Hackathon-Team14\Final>python face.py
+Source Face: ITZY(P).jpg
+---
+Number  1 similar face:
+Target Face IITZYYY.jpg
+Similarity : 99.7168197631836%
+---
+{1: 99.7168197631836}
 '''
