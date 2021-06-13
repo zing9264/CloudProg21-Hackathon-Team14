@@ -15,7 +15,9 @@
 import os
 import sys
 import json
+from typing import ItemsView
 import boto3
+import requests
 
 import flask
 from flask import request, Response, redirect, url_for, flash, session
@@ -40,24 +42,35 @@ application.secret_key = application.config['SECRET_KEY']
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
 # DEFINE S3  source url
-object_url = "https://"+application.config['S3'] +".s3.amazonaws.com/"
+object_url = "https://"+application.config['S3'] + ".s3.amazonaws.com/"
 # #這塊需要從資料庫撈資料 並用jinja2 渲染到前端
+
 
 @application.route('/')
 def welcome():
     theme = application.config['THEME']
-    delevery_list = get_all_Data_DBitem(application.config['DELIVERY_LIST'])
-    print(delevery_list)
-    for i in range(len(delevery_list)):
-        delevery_list[i]['name']=get_DBitem(application.config['USER_LIST'],delevery_list[i]['id'])['name']
-    return flask.render_template('index.html', flask_debug=application.debug , deleverys = delevery_list, object_url=object_url)
+    delivery_list = get_all_Data_DBitem(application.config['DELIVERY_LIST'])
+    print(delivery_list)
+    for i in range(len(delivery_list)):
+        delivery_list[i]['name'] = get_DBitem(
+            application.config['USER_LIST'], delivery_list[i]['id'])['name']
+    return flask.render_template('index.html', flask_debug=application.debug, deliverys=delivery_list, object_url=object_url)
+
+
+@application.route('/<userId>/send_notify')
+def send_notify(userId):
+    item = get_DBitem(application.config['DELIVERY_LIST'], userId)
+    push_msg(userId,item['productname'])
+    return redirect(url_for('welcome'))
 
 @application.route('/addDelivery')
 def addDelivery():
     user_list = get_all_Data_DBitem(application.config['USER_LIST'])
-    return flask.render_template('add_delivery.html', flask_debug=application.debug,users=user_list, usersforjs=json.dumps(user_list))
+    return flask.render_template('add_delivery.html', flask_debug=application.debug, users=user_list, usersforjs=json.dumps(user_list))
 
-#註冊帳號與所有資料
+# 註冊帳號與所有資料
+
+
 @application.route('/addDeliveryPost', methods=['POST'])
 def addDeliveryPost():
     ddb_conn = boto3.resource(
@@ -69,23 +82,28 @@ def addDeliveryPost():
         item_list.append(item)
     print(item_list)
     print(delivery_data)
-    delivery_data['condition']='運送中'
+    delivery_data['condition'] = '運送中'
     ddb_table = ddb_conn.Table(application.config['DELIVERY_LIST'])
     ddb_table.put_item(Item=delivery_data)
     #flash('SIGN UP SUCCESS')
     return redirect(url_for('welcome'))
 
-ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#上傳圖片頁面
+# 上傳圖片頁面
 @application.route('/<userId>/upload_file_page')
 def upload_file_page(userId):
     print(userId)
     return flask.render_template('upload_image.html', userId=userId, flask_debug=application.debug)
 
-#上傳圖片功能，會存檔到UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
+# 上傳圖片功能，會存檔到UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
+
+
 @application.route('/<userId>/image_upload', methods=['POST'])
 def storeimage_upload(userId):
     if request.method == 'POST':
@@ -99,35 +117,62 @@ def storeimage_upload(userId):
 
         if file and allowed_file(file.filename):
             filename = userId+'.jpg'
-            upload_to_S3(file,filename)
+            upload_to_S3(file, filename)
             print(filename)
             # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
-            return flask.render_template('upload_image.html', filename=filename ,storename=userId,object_url=object_url, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', filename=filename, storename=userId, object_url=object_url, flask_debug=application.debug)
         else:
             flash('Allowed image types are - png, jpg, jpeg')
             return flask.render_template('upload_image.html', storename=userId, flask_debug=application.debug)
 
-#回傳圖片位置 UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
+# 回傳圖片位置 UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
+
+
 @application.route('/display/<filename>')
 def display_image(filename):
     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
+# push msg to line (without replytoken)
+def push_msg(userid,product):
+    auth_token = "Y9LesqC4GBjovyLxcZiljevh8i2t0ySIhHwTlRh13T6LNNI/3Jd3sT2PDADxgFex2o1gVrlbK1oT8gq9Oo0q8XdYMnmRE3bVkV48titam8dirGIRtwNwtqFRAUKlDKrsvnNCCVUDy7pBOCxHz8ptEwdB04t89/1O/w1cDnyilFU="
+    headers = {"Authorization": "Bearer " + auth_token}
+    push = {
+        "to": " ",
+        "messages": [
+            {
+                "type": "text",
+                "text": "你的貨物「"+product+"」已送達"
+            },
+            {
+                "type": "text",
+                "text": "請確認並開鎖"
+            }
+        ]
+    }
+    push['to'] = userid
+    push_url = "https://api.line.me/v2/bot/message/push"
+    response = requests.post(push_url, headers=headers, json=push)
+    print(response)
+
 def get_all_Data_DBitem(tablename):
-    dynamodb = boto3.resource('dynamodb', region_name=application.config['AWS_REGION'])
+    dynamodb = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
     table = dynamodb.Table(tablename)
     res = table.scan()
     data_info_list = res['Items']
     return data_info_list
 
+
 def dict_to_2Darray(dict_data):
-    array_2D =[]
+    array_2D = []
     for item in dict_data:
-        a = [item ,dict_data[item]]
+        a = [item, dict_data[item]]
         array_2D.append(a)
     return array_2D
-    
+
+
 def add_DBitem(tablename, item):
     # it's easy to update or add (update item just use same key)
     dynamodb = boto3.resource(
@@ -137,6 +182,7 @@ def add_DBitem(tablename, item):
     print(response)
     return
 
+
 def delete_DBitem(tablename, userid):
     # storename must be string , use key "store" to delete item
     dynamodb = boto3.resource(
@@ -145,6 +191,7 @@ def delete_DBitem(tablename, userid):
     response = table.delete_item(Key={'id': userid})
     print(response)
     return
+
 
 def get_DBitem(tablename, userid):
     dynamodb = boto3.resource(
@@ -157,6 +204,8 @@ def get_DBitem(tablename, userid):
     return item
 
 # parse example
+
+
 def parse_db_item(storename):
     item = get_DBitem(application.config['STORE_INFO'], storename)
     person_now = item['person_now']         # int?
@@ -167,9 +216,10 @@ def parse_db_item(storename):
     tag = item['tag']  # list
 
 
-def upload_to_S3(image,name):
+def upload_to_S3(image, name):
     s3 = boto3.client('s3')
-    s3.upload_fileobj(image,application.config['S3'],name,ExtraArgs={'ACL':'public-read', 'ContentType': 'image/jpeg'})
+    s3.upload_fileobj(image, application.config['S3'], name, ExtraArgs={
+                      'ACL': 'public-read', 'ContentType': 'image/jpeg'})
     return
 
 
@@ -179,13 +229,13 @@ initUserList = {
     'name': '陳先生',
     'Box': ['A_box'],
     'address': ['300新竹市東區光復路二段101號'],
-    'phone' : '0989744940'
+    'phone': '0989744940'
 }
 
 initDeliveryList = {
     'id': 'TestUser001',
     'address': '300新竹市東區光復路二段101號',
-    'condition': '運送中',  #運送中、交貨中、已送達
+    'condition': '運送中',  # 運送中、交貨中、已送達
     'productname': '小熊玩偶',
 }
 
@@ -244,7 +294,7 @@ def check_or_create():
     except:
         print("init DB item fail")
 
-#check_or_create()
+# check_or_create()
 
 
 if __name__ == '__main__':

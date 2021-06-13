@@ -17,39 +17,40 @@
 
 <div class="storelist">
     <div class="row">
-        {% for delevery in deleverys %}
+        {% for delivery in deliverys %}
         <div class="col-sm-12">
             <div class="card store-card">
                 <div class=" card-body">
-                    <h3 class="card-title" id='id-{{ loop.index }}'>訂購人: {{ delevery.name }}</h3>
+                    <h3 class="card-title" id='id-{{ loop.index }}'>訂購人: {{ delivery.name }}</h3>
 
                     <div class="row">
                         <div class="col-sm-9">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <p class="card-text">訂購人ID: {{ delevery.id }} </p>
+                                    <p class="card-text">訂購人ID: {{ delivery.id }} </p>
                                 </div>
 
                             </div>
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <p class="card-text">商品名稱: {{ delevery.productname }} </p>
+                                    <p class="card-text">商品名稱: {{ delivery.productname }} </p>
                                 </div>
                                 <div class="col-sm-6">
-                                    <p class="card-text">運送狀態: {{ delevery.condition }}</p>
+                                    <span class="card-text">運送狀態:</span>
+                                    <span class="badge badge-pill badge-warning"> {{ delivery.condition }}</span>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <p class="card-text">地址: {{ delevery.address}} </p>
+                                    <p class="card-text">地址: {{ delivery.address}} </p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <button class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</button>
-                                    <a href="/{{ delevery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
+                                    <a href="/{{ delivery.id }}/send_notify" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</a>
+                                    <a href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
                                 </div>
                             </div>
                         </div>
