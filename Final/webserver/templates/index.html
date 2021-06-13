@@ -1,13 +1,10 @@
-{% extends "base.html" %} {% block title %} CloudProg21-Hackathon-Team14 {% endblock %} {% block header %}
+{% extends "base.html" %} {% block title %} CloudProg21-FinalProject-Team14 {% endblock %} {% block header %}
 <ul class="nav nav-pills justify-content-end">
     <li class="nav-item">
-        <a class="nav-link active" href="/">Home</a>
+        <a class="nav-link active" href="/">運送清單</a>
     </li>
     <li class="nav-item">
-        <li><a class="nav-link" href="/login">店家登入</a></li>
-    </li>
-    <li class="nav-item">
-        <li><a class="nav-link " href="/sign_up">餐廳註冊</a></li>
+        <li><a class="nav-link " href="/addDelivery">新增訂單</a></li>
     </li>
 </ul>
 {% endblock %} {% block main %}
@@ -15,23 +12,8 @@
 
 <style type="text/css">
     /* Set the size of the div element that contains the map */
-    
-    #map {
-        height: 400px;
-        /* The height is 400 pixels */
-        width: 100%;
-        /* The width is the width of the web page */
-    }
+
 </style>
-
-
-<div>
-    <div style="width: 100%; margin-bottom: 1rem;" id="map"></div>
-</div>
-<hr class="my-3 ">
-
-<!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3J2tSWhEOApCP4o3PvtY7EftwlzLh-Tk&callback=initMap&libraries=places,geometry&channel=GMPSB_locatorplus_v2_cABCDE" async defer></script>
 
 <div class="storelist">
     <div class="row">
@@ -39,15 +21,35 @@
         <div class="col-sm-12">
             <div class="card store-card">
                 <div class=" card-body">
+                    <h3 class="card-title" id='id-{{ loop.index }}'>訂購人: {{ delevery.name }}</h3>
+
                     <div class="row">
-                        <div class="col-sm-12">
-                            <h3 class="card-title" id='storeName-{{ loop.index }}'>{{ delevery.id }}</h3>
+                        <div class="col-sm-9">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <p class="card-text">商品名稱: {{ delevery.name }} </p>
+                                    <p class="card-text">訂購人ID: {{ delevery.id }} </p>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
                                     <p class="card-text">商品名稱: {{ delevery.productname }} </p>
-                                    <p class="card-text">地址: {{ delevery.address}} </p>
+                                </div>
+                                <div class="col-sm-6">
                                     <p class="card-text">運送狀態: {{ delevery.condition }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p class="card-text">地址: {{ delevery.address}} </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <button class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</button>
+                                    <a href="/{{ delevery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
                                 </div>
                             </div>
                         </div>

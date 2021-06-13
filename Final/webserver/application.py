@@ -19,7 +19,6 @@ import boto3
 
 import flask
 from flask import request, Response, redirect, url_for, flash, session
-from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
@@ -40,68 +39,6 @@ application.secret_key = application.config['SECRET_KEY']
 # Only enable Flask debugging if an env var is set to true
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
-# ============================== login =================================
-login_manager = LoginManager()
-login_manager.init_app(application)
-login_manager.session_protection = "strong"
-login_manager.login_view = 'loginpage'
-class User(UserMixin):
-    pass
-
-def check_user(id):
-    dynamodb = boto3.resource(
-        'dynamodb', region_name=application.config['AWS_REGION'])
-    table = dynamodb.Table(application.config['USER_LIST'])
-    try:
-        res = table.get_item(Key={'id': id})
-        return res['Item']
-    except:
-        print("User doesn't exist")
-        return None
-        
-@login_manager.user_loader
-def load_user(id):
-    if check_user(id) is not None:
-        curr_user = User()
-        curr_user.id = id
-    return curr_user
-    
-@application.route('/sign_up')
-def sign_uppage():
-    return flask.render_template('sign_up_restaurant.html', flask_debug=application.debug)
-
-@application.route('/login', methods=['GET','POST'])
-def loginpage():
-    id = request.form.get('inputEmail')
-    password = request.form.get('inputPassword')
-    remember = True if request.form.get('remember') else False
-    # print(id)
-    user = check_user(id)
-    if user is not None and password == user['password']:
-        curr_user = User()
-        curr_user.id = id
-        print(curr_user)
-        login_user(curr_user,remember=remember)
-        next = request.args.get('next')
-        print(request.args)
-        if not next_is_valid(next):
-            #  如果使用者沒有該url權限，那就reject掉。
-            return 'Bad Boy!!'
-        return redirect(next or url_for('welcome'))
-    # elif user is not None :
-    #     flash('Wrong username or password!')
-    return flask.render_template('login.html', flask_debug=application.debug)
-def next_is_valid(url):
-    return True
-# define logout
-@application.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    session.pop('logged_in', None)
-    flash('You already logout !!!')
-    return redirect(url_for('welcome'))
-# ============================== login =================================
-
 # DEFINE S3  source url
 object_url = "https://"+application.config['S3'] +".s3.amazonaws.com/"
 # #這塊需要從資料庫撈資料 並用jinja2 渲染到前端
@@ -113,212 +50,70 @@ def welcome():
     print(delevery_list)
     for i in range(len(delevery_list)):
         delevery_list[i]['name']=get_DBitem(application.config['USER_LIST'],delevery_list[i]['id'])['name']
-    return flask.render_template('index.html', theme=theme, flask_debug=application.debug , deleverys = delevery_list, object_url=object_url)
+    return flask.render_template('index.html', flask_debug=application.debug , deleverys = delevery_list, object_url=object_url)
 
+@application.route('/addDelivery')
+def addDelivery():
+    user_list = get_all_Data_DBitem(application.config['USER_LIST'])
+    return flask.render_template('add_delivery.html', flask_debug=application.debug,users=user_list, usersforjs=json.dumps(user_list))
 
-#店家詳細資料這塊需要傳入所有資料庫變數，用jinja2 render出來
-@application.route('/storepage/<storename>')
-def storepage(storename):
-    print(storename)
-    storeinfo =get_DBitem(application.config['STORE_INFO'],storename)
-    contact = json.loads(storeinfo['contact'])   # dict
-    # turn dict to 2D array in order to use jinja to show the info in DB
-    normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
-    discount = dict_to_2Darray(json.loads(storeinfo['discount']))  
-    return flask.render_template('storepage.html',
-                                flask_debug=application.debug,
-                                info = storeinfo,
-                                contact = contact,
-                                normal = normal,
-                                object_url=object_url,
-                                discount = discount)
+#註冊帳號與所有資料
+@application.route('/addDeliveryPost', methods=['POST'])
+def addDeliveryPost():
+    ddb_conn = boto3.resource(
+        'dynamodb', region_name=application.config['AWS_REGION'])
+    delivery_data = dict()
+    item_list = []
+    for item in request.form:
+        delivery_data[item] = request.form[item]
+        item_list.append(item)
+    print(item_list)
+    print(delivery_data)
+    delivery_data['condition']='運送中'
+    ddb_table = ddb_conn.Table(application.config['DELIVERY_LIST'])
+    ddb_table.put_item(Item=delivery_data)
+    #flash('SIGN UP SUCCESS')
+    return redirect(url_for('welcome'))
 
- 
 ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #上傳圖片頁面
-@application.route('/storepage/<storename>/upload_file_page')
-@login_required
-def upload_file_page(storename):
-    print(storename)
-    return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+@application.route('/<userId>/upload_file_page')
+def upload_file_page(userId):
+    print(userId)
+    return flask.render_template('upload_image.html', userId=userId, flask_debug=application.debug)
 
 #上傳圖片功能，會存檔到UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
-@application.route('/storepage/<storename>/image_upload', methods=['POST'])
-@login_required
-def storeimage_upload(storename):
+@application.route('/<userId>/image_upload', methods=['POST'])
+def storeimage_upload(userId):
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
-            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', userId=userId, flask_debug=application.debug)
         file = request.files['file']
         if file == '':
             flash('No image selected for uploading')
-            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', userId=userId, flask_debug=application.debug)
 
         if file and allowed_file(file.filename):
-            filename = storename+'.jpg'
+            filename = userId+'.jpg'
             upload_to_S3(file,filename)
             print(filename)
             # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
-            return flask.render_template('upload_image.html', filename=filename ,storename=storename,object_url=object_url, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', filename=filename ,storename=userId,object_url=object_url, flask_debug=application.debug)
         else:
             flash('Allowed image types are - png, jpg, jpeg')
-            return flask.render_template('upload_image.html', storename=storename, flask_debug=application.debug)
+            return flask.render_template('upload_image.html', storename=userId, flask_debug=application.debug)
 
 #回傳圖片位置 UPLOAD_FOLDER='static/uploads/' 之後要改成boto3 S3 bucket
 @application.route('/display/<filename>')
 def display_image(filename):
     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
-#更新店家資料頁面 這塊需要傳入所有資料庫變數，用jinja2 render出來
-@application.route('/storepage/<storename>/update_storepage')
-@login_required
-def storeupdate_storepage(storename):
-    userinfo = check_user(current_user.id)
-    print(userinfo)
-    storeinfo =get_DBitem(application.config['STORE_INFO'],storename)
-    contact = json.loads(storeinfo['contact'])   # dict
-    # turn dict to 2D array in order to use jinja to show the info in DB
-    normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
-    discount = dict_to_2Darray(json.loads(storeinfo['discount']))
-    if userinfo['storename'] == storename:
-        return flask.render_template('update_storepage.html',storename=storename, info = storeinfo,
-                                contact = contact,
-                                normal = normal,
-                                discount = discount, flask_debug=application.debug)
-    else:
-        flash('This is not your store !!!')
-        return redirect(url_for('storepage',storename=storename))
-    # return flask.render_template('update_storepage.html', storename=storename, flask_debug=application.debug)
-
-#更新店家資料功能 這塊需要驗證登入  這部分前端動態處理還沒完成
-@application.route('/storepage/<storename>/updateFormPost' ,methods=['POST'])
-@login_required
-def update_DBdata(storename):
-    update_data = dict()
-    item_list = []
-    data = {}
-    for item in request.form:
-        data[item] = request.form[item]
-        item_list.append(item)
-    # print(data)
-    # print(item_list)
-    update_data_parse(data, item_list , storename)
-    flash('UPDATE SUCCESS')
-    return redirect(url_for('storepage',storename=storename))
-
-#註冊帳號與所有資料
-@application.route('/signupFormPost', methods=['POST'])
-def signupFormPost():
-    signup_data = dict()
-    item_list = []
-    for item in request.form:
-        signup_data[item] = request.form[item]
-        item_list.append(item)
-    signup_data_parse(signup_data, item_list)
-    flash('SIGN UP SUCCESS')
-    return redirect(url_for('welcome'))
-
-#註冊帳號用的語法分析器
-def signup_data_parse(data, item_list):
-    dynamodb = boto3.resource(
-        'dynamodb', region_name=application.config['AWS_REGION'])
-    normal_count = []
-    discount_count = []
-    for item in item_list:
-        if 'normal' in item and 'price' not in item:
-            normal_count.append(item)
-        elif 'discount' in item and 'price' not in item:
-            discount_count.append(item)
-    # user table
-    user = {}
-    user['id'] = data['inputEmail']
-    user['password'] = data['inputPassword']
-    user['storename'] = data['inputstore']
-    table = dynamodb.Table(application.config['USER_LIST'])
-    response = table.put_item(Item=user)
-    print("user info", response)
-    # store info table
-    storeinfo = {'store': data['inputstore'],
-                 'person_max': data['inputperson_max'], 'tag': data['tag'].split()}
-    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
-    normal = {}
-    discount = {}
-    for i, item in enumerate(normal_count):
-        pricename = 'normal-price-'+str(i+1)
-        normal[data[item]] = data[pricename]
-    for i, item in enumerate(discount_count):
-        pricename = 'discount-price-'+str(i+1)
-        discount[data[item]] = data[pricename]
-    tag = data['tag'].split()
-    storeinfo['contact'] = json.dumps(contact)
-    storeinfo['normal'] = json.dumps(normal)
-    storeinfo['discount'] = json.dumps(discount)
-    # set default person
-    storeinfo['person_now'] = 0
-    table = dynamodb.Table(application.config['STORE_INFO'])
-    response = table.put_item(Item=storeinfo)
-    print("store info", response)
-
-    return
-
-
-def update_data_parse(data, item_list,storename):
-    print("parse HI: ",data)
-    dynamodb = boto3.resource(
-        'dynamodb', region_name=application.config['AWS_REGION'])
-    normal_count = []
-    discount_count = []
-    for item in item_list:
-        if 'normal' in item and 'price' not in item:
-            normal_count.append(item)
-        elif 'discount' in item and 'price' not in item:
-            discount_count.append(item)
-    # store info table
-    print("change",data['inputperson_now'])
-    storeinfo = {'store': storename,
-                 'person_max': data['inputperson_max'], 
-                 'person_now': data['inputperson_now'],
-                 'tag': data['tag'].split()}
-    print("change ",storeinfo)
-    contact = {'phone': data['inputphone'], 'address': data['inputAddress']}
-    normal = {}
-    discount = {}
-    for i, item in enumerate(normal_count):
-        pricename = 'normal-price-'+str(i+1)
-        normal[data[item]] = data[pricename]
-    for i, item in enumerate(discount_count):
-        pricename = 'discount-price-'+str(i+1)
-        discount[data[item]] = data[pricename]
-    tag = data['tag'].split()
-    storeinfo['contact'] = json.dumps(contact)
-    storeinfo['normal'] = json.dumps(normal)
-    storeinfo['discount'] = json.dumps(discount)
-    table = dynamodb.Table(application.config['STORE_INFO'])
-    response = table.put_item(Item=storeinfo)
-    print("store info", response)
-    return
-
-@application.route('/test')
-def test():
-    store_list = get_all_store_DBitem(application.config['STORE_INFO'])
-    storename = '87店'
-    storeinfo =get_DBitem(application.config['STORE_INFO'],storename)
-    contact = json.loads(storeinfo['contact'])   # dict
-    normal = dict_to_2Darray(json.loads(storeinfo['normal']))     
-    discount = dict_to_2Darray(json.loads(storeinfo['discount']))  
-    return flask.render_template('test.html', 
-            flask_debug=application.debug,
-            info = storeinfo,
-            contact = contact,
-            normal = normal,
-            discount = discount)
-    
 def get_all_Data_DBitem(tablename):
     dynamodb = boto3.resource('dynamodb', region_name=application.config['AWS_REGION'])
     table = dynamodb.Table(tablename)

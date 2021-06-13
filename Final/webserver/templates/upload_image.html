@@ -1,13 +1,10 @@
-{% extends "base.html" %} {% block title %} {{storename}} 上傳圖片{% endblock %} {% block header %}
+{% extends "base.html" %} {% block title %} {{userId}} 上傳圖片{% endblock %} {% block header %}
 <ul class="nav nav-pills justify-content-end">
     <li class="nav-item">
-        <a class="nav-link " href="/">Home</a>
+        <a class="nav-link " href="/">運送清單</a>
     </li>
     <li class="nav-item">
-        <li><a class="nav-link" href="/login">店家登入</a></li>
-    </li>
-    <li class="nav-item">
-        <li><a class="nav-link" href="/sign_up">餐廳註冊</a></li>
+        <li><a class="nav-link " href="/addDelivery">新增訂單</a></li>
     </li>
 </ul>
 {% endblock %} {% block main %}
@@ -30,7 +27,7 @@
 </div>
 {% endif %}
 
-<form method="post" action="/storepage/{{storename}}/image_upload" enctype='multipart/form-data'>
+<form method="post" action="/{{userId}}/image_upload" enctype='multipart/form-data'>
     <div class="row">
         <div class="col-10">
             <p>
@@ -43,7 +40,7 @@
             <button type="submit" class="btn btn-primary">上傳照片</button>
         </div>
         <div class="col-6">
-            <a class="btn btn-primary" href="/storepage/{{storename}}" role="button">返回</a>
+            <a class="btn btn-primary" href="/" role="button">返回</a>
         </div>
     </div>
 </form>

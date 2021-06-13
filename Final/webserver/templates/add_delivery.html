@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block title %} 新增訂單 {% endblock %} {% block header %}
+<ul class="nav nav-pills justify-content-end">
+    <li class="nav-item">
+        <a class="nav-link " href="/">運送清單</a>
+    </li>
+    <li class="nav-item">
+        <li><a class="nav-link active" href="/addDelivery">新增訂單</a></li>
+    </li>
+</ul>
+{% endblock %} {% block main %}
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+
+<script>
+
+    function doSomething(event) {
+        a = JSON.parse({{usersforjs | tojson}});
+        console.log(a);
+        sel=document.querySelector("#selectAddress")
+        deleteAllOptions(sel)
+
+        a.forEach(function(item,index){
+            if(item.id==event.value){
+                item.address.forEach(function(item2,index){
+                    addOption(sel,item2,item2)
+                });
+            }
+        });
+    }
+
+    function deleteAllOptions(sel) {
+        sel.options.length = 0;
+        x=new Option('', 'noselect')
+        x.style.display='none'
+        sel.options.add(x);
+
+    }
+
+    function addOption(sel, text, value) {
+        sel.options.add(new Option(text, value));
+    }
+</script>
+
+
+<form id="deliveryPostForm" role="form" action="/addDeliveryPost" method="post">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="selectUserID">用戶ID</label>
+            <select onchange="doSomething(this);" onpageshow="this.selectedIndex = -1;" name="id" class="form-control" id="selectUserID">
+                <option selected="selected" disabled="disabled"  style='display: none' value=''></option>  
+                {% for user in users %}
+                <option value="{{user.id}}">{{user.id}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="inputproductname">商品名稱</label>
+            <input type="text" class="form-control" name="productname" id="inputproductname" placeholder="小熊玩偶">
+        </div>
+    </div>
+    <div id="address" class="form-row addressdiv">
+        <div class="form-group col-md-8">
+            <label for="selectUserID">地址選擇</label>
+            <select name="address" class="form-control" id="selectAddress">
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-12 ">
+            <button id="submit" type="submit" class="btn btn-primary">新增訂單</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
