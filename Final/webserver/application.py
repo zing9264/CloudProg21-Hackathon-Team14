@@ -18,6 +18,7 @@ import json
 from typing import ItemsView
 import boto3
 import requests
+from datetime import datetime
 
 import flask
 from flask import request, Response, redirect, url_for, flash, session
@@ -47,20 +48,43 @@ object_url = "https://"+application.config['S3'] + ".s3.amazonaws.com/"
 
 
 @application.route('/')
+def preload():
+    return flask.render_template('preload.html', flask_debug=application.debug)
+
+@application.route('/index')
 def welcome():
     theme = application.config['THEME']
     delivery_list = get_all_Data_DBitem(application.config['DELIVERY_LIST'])
-    print(delivery_list)
     for i in range(len(delivery_list)):
-        delivery_list[i]['name'] = get_DBitem(
-            application.config['USER_LIST'], delivery_list[i]['id'])['name']
+        delivery_list[i]['name'] = get_DBitem(application.config['USER_LIST'], delivery_list[i]['id'])['name']
+        delivery_list[i]['phone'] = get_DBitem(application.config['USER_LIST'], delivery_list[i]['id'])['phone']
     return flask.render_template('index.html', flask_debug=application.debug, deliverys=delivery_list, object_url=object_url)
 
 
-@application.route('/<userId>/send_notify')
+@application.route('/<userId>/send_notify', methods=['GET'])
 def send_notify(userId):
-    item = get_DBitem(application.config['DELIVERY_LIST'], userId)
-    push_msg(userId,item['productname'])
+    creattime=request.args.get('creattime')
+    table = boto3.resource('dynamodb', region_name=application.config['AWS_REGION']).Table(application.config['DELIVERY_LIST'])
+    res = table.get_item(Key={'id': userId,'creattime':creattime})
+    item = res['Item']
+    print("----------send_notify------------")
+    print(userId,creattime)
+    response = table.update_item(
+        Key={
+            'id': userId,
+            'creattime': creattime
+        },
+        UpdateExpression="set delivery_condition=:c",
+        ExpressionAttributeValues={
+            ':c': '交貨中'
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    print(response)
+    push_msg(userId, item['productname'])
+    print("----------send_end------------")
+    
+
     return redirect(url_for('welcome'))
 
 @application.route('/addDelivery')
@@ -82,11 +106,12 @@ def addDeliveryPost():
         item_list.append(item)
     print(item_list)
     print(delivery_data)
-    delivery_data['condition'] = '運送中'
+    delivery_data['creattime'] = datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
+    delivery_data['delivery_condition'] = '運送中'
     ddb_table = ddb_conn.Table(application.config['DELIVERY_LIST'])
     ddb_table.put_item(Item=delivery_data)
     #flash('SIGN UP SUCCESS')
-    return redirect(url_for('welcome'))
+    return redirect(url_for('preload'))
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -234,8 +259,9 @@ initUserList = {
 
 initDeliveryList = {
     'id': 'TestUser001',
+    'creattime': datetime(2015, 1, 1).strftime("%Y/%m/%d,%H:%M:%S"),
     'address': '300新竹市東區光復路二段101號',
-    'condition': '運送中',  # 運送中、交貨中、已送達
+    'delivery_condition': '運送中',  # 運送中、交貨中、已送達
     'productname': '小熊玩偶',
 }
 
@@ -268,9 +294,9 @@ def check_or_create():
         # create DELIVERY info table
         ddb_conn.create_table(
             TableName=application.config['DELIVERY_LIST'],
-            KeySchema=[{'AttributeName': 'id', 'KeyType': 'HASH'}],
+            KeySchema=[{'AttributeName': 'id', 'KeyType': 'HASH'},{'AttributeName': 'creattime', 'KeyType': 'RANGE'}],
             AttributeDefinitions=[
-                {'AttributeName': 'id', 'AttributeType': 'S'}],
+                {'AttributeName': 'id', 'AttributeType': 'S'},{'AttributeName': 'creattime', 'AttributeType': 'S'}],
             ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
         # create user list table
         ddb_conn.create_table(
@@ -279,6 +305,7 @@ def check_or_create():
             AttributeDefinitions=[
                 {'AttributeName': 'id', 'AttributeType': 'S'}],
             ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10})
+
     except Exception as e:
         print(e)
         ddb_table = ddb_conn.Table(application.config['DELIVERY_LIST'])
@@ -294,7 +321,7 @@ def check_or_create():
     except:
         print("init DB item fail")
 
-# check_or_create()
+#check_or_create()
 
 
 if __name__ == '__main__':

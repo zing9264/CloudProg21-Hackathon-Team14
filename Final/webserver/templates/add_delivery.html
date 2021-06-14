@@ -49,7 +49,7 @@
             <select onchange="doSomething(this);" onpageshow="this.selectedIndex = -1;" name="id" class="form-control" id="selectUserID">
                 <option selected="selected" disabled="disabled"  style='display: none' value=''></option>  
                 {% for user in users %}
-                <option value="{{user.id}}">{{user.id}}</option>
+                <option value="{{user.id}}">{{user.name}}-{{user.id}}</option>
                 {% endfor %}
             </select>
         </div>

@@ -12,8 +12,37 @@
 
 <style type="text/css">
     /* Set the size of the div element that contains the map */
-
 </style>
+
+
+<script>
+    function changetagcolor(){
+        a=document.querySelectorAll(".delivery-condition")
+        console.log(a)
+        b=document.querySelector(".delivery-condition")
+        console.log(b)
+
+        a.forEach(function(item){
+            console.log(item)
+            if(item.innerHTML==' 運送中'){
+                item.setAttribute('class','badge badge-pill badge-warning')
+            }
+            if(item.innerHTML==' 交貨中'){
+                item.setAttribute('class','badge badge-pill badge-info')
+            }
+            if(item.innerHTML==' 已送達'){
+                item.setAttribute('class','badge badge-pill badge-success')
+            }
+        })
+    }
+
+    window.addEventListener("load", function(event) {
+          console.log("All resources finished loading!");
+          changetagcolor()
+    });
+</script>
+
+
 
 <div class="storelist">
     <div class="row">
@@ -27,17 +56,7 @@
                         <div class="col-sm-9">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <p class="card-text">訂購人ID: {{ delivery.id }} </p>
-                                </div>
-
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <p class="card-text">商品名稱: {{ delivery.productname }} </p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <span class="card-text">運送狀態:</span>
-                                    <span class="badge badge-pill badge-warning"> {{ delivery.condition }}</span>
+                                    <p class="card-text">ID: {{ delivery.id }} </p>
                                 </div>
                             </div>
                             <div class="row">
@@ -45,11 +64,28 @@
                                     <p class="card-text">地址: {{ delivery.address}} </p>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="card-text">商品名稱: {{ delivery.productname }} </p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="card-text">訂購時間: {{ delivery.creattime }} </p>
+                                </div>   
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="card-text">顧客電話: {{ delivery.phone}} </p>
+                                </div>
+                             <div class="col-sm-6">
+                                    <span class="card-text">運送狀態:</span>
+                                    <span class="badge badge-pill delivery-condition"> {{ delivery.delivery_condition }}</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <a href="/{{ delivery.id }}/send_notify" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</a>
+                                    <a href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</a>
                                     <a href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
                                 </div>
                             </div>
