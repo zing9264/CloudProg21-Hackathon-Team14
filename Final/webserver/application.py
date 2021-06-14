@@ -50,14 +50,18 @@ object_url = "https://"+application.config['S3'] + ".s3.amazonaws.com/"
 @application.route('/')
 def preload():
     return flask.render_template('preload.html', flask_debug=application.debug)
-
 @application.route('/index')
+
 def welcome():
+    user_dict={}
     theme = application.config['THEME']
     delivery_list = get_all_Data_DBitem(application.config['DELIVERY_LIST'])
+    user_list = get_all_Data_DBitem(application.config['USER_LIST'])
+    for i in range(len(user_list)):
+        user_dict[user_list[i]['id']] = {'name': user_list[i]['name'], 'phone': user_list[i]['phone']}
     for i in range(len(delivery_list)):
-        delivery_list[i]['name'] = get_DBitem(application.config['USER_LIST'], delivery_list[i]['id'])['name']
-        delivery_list[i]['phone'] = get_DBitem(application.config['USER_LIST'], delivery_list[i]['id'])['phone']
+        delivery_list[i]['name'] = user_dict[delivery_list[i]['id']]['name']
+        delivery_list[i]['phone'] = user_dict[delivery_list[i]['id']]['phone']
     return flask.render_template('index.html', flask_debug=application.debug, deliverys=delivery_list, object_url=object_url)
 
 
