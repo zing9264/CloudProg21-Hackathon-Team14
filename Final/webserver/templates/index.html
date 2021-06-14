@@ -65,6 +65,7 @@
         <tr>
           <th>訂購人</th>
           <th>商品</th>
+          <th>訂購時間</th>
           <th>聯絡資訊</th>
           <th>運送狀態</th>
           <th>操作按鈕</th>
@@ -75,17 +76,14 @@
         <tr>
           <td> {{ delivery.name }}</td>
           <td>{{ delivery.productname }}</td>
+          <td>{{ delivery.creattime }} </td>
           <td>{{ delivery.address}}
             <br/>{{ delivery.phone}}
           </td>
           <td><span class="badge badge-pill delivery-condition"> {{ delivery.delivery_condition }}</span></td>
           <td>
-            <div class="row">
-                <div class="col-sm-12">
-                    <a href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</a>
-                    <a href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
-                </div>
-            </div>
+            <span href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</span>
+            <span href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</span>
         </td>
         </tr>
         {% endfor %}
