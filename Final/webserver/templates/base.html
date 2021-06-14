@@ -48,16 +48,42 @@
         }
         .store-card {
             margin-bottom: 1rem;
+            
+        }
+        .card-body{
+            background-color: #F0F8FF;
         }
 
     </style>
 
 </head>
 
-<body>
+<body style="background-color: #F0F8FF">
     <div id="loading"></div>
     <div class="container">
         <div class="header">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand"  href="#">Smart Boxes</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                    </button>
+                <div class="collapse navbar-collapse text-right" id="navbarNavAltMarkup">
+                    <ul class="nav nav-pills justify-content-end">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">運送清單</a>
+                        </li>
+                        <li class="nav-item">
+                            <li><a class="nav-link " href="/addDelivery">新增訂單</a></li>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="bg-info jumbotron text-left text-white">
+                <h5>XXX司機：</h5>
+                <li> 今日訂單數目：3</li> 
+                <li> 未處理數目：2</li>
+                <li> 已完成：2</li>
+            </div>
             {% block header %} {% endblock %}
         </div>
 

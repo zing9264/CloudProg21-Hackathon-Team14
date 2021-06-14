@@ -151,6 +151,7 @@ def storeimage_upload(userId):
             # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
             #print('upload_image filename: ' + filename)
             flash('Image successfully uploaded and displayed below')
+            push_img(userId,filename)
             return flask.render_template('upload_image.html', filename=filename, storename=userId, object_url=object_url, flask_debug=application.debug)
         else:
             flash('Allowed image types are - png, jpg, jpeg')
@@ -182,6 +183,22 @@ def push_msg(userid,product):
     }
     push['to'] = userid
     push_url = "https://api.line.me/v2/bot/message/push"
+    response = requests.post(push_url, headers=headers, json=push)
+    print(response)
+    
+def push_img(userid,photo_name):
+    auth_token = "Y9LesqC4GBjovyLxcZiljevh8i2t0ySIhHwTlRh13T6LNNI/3Jd3sT2PDADxgFex2o1gVrlbK1oT8gq9Oo0q8XdYMnmRE3bVkV48titam8dirGIRtwNwtqFRAUKlDKrsvnNCCVUDy7pBOCxHz8ptEwdB04t89/1O/w1cDnyilFU="
+    headers = {"Authorization": "Bearer " + auth_token}
+    push = {"to": " ", "messages": []}
+    print(object_url+photo_name)
+    photo_msg = {"type": "image", "originalContentUrl": object_url+photo_name,
+             "previewImageUrl": object_url+photo_name}
+    push['to'] = userid
+    push['messages'] =[photo_msg]
+    push_url = "https://api.line.me/v2/bot/message/push"
+    response = requests.post(push_url, headers=headers, json=push)
+    text_msg ={"type": "text","text": "你的貨物已放入智慧包裹箱，請確認上方照片"}
+    push['messages'] =[text_msg]
     response = requests.post(push_url, headers=headers, json=push)
     print(response)
 
