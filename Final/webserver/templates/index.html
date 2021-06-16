@@ -27,42 +27,124 @@
 
 <style type="text/css">
     /* Set the size of the div element that contains the map */
+    :root {
+        --iconw:40px;
+      }
+
+    @media(max-width:1000px){
+        .deliver-table{
+            display:none
+        }
+      }
+    @media(min-width:1000px){
+        .storelist{
+            display:none
+        }
+      }
+    .deliver-table{
+        box-shadow: 0px 0px 20px rgb(0 0 0 / 15%);
+        background-color:white;
+        padding: 20px;
+    }
+    .transporting{
+        background-image: url("{{ url_for('static', filename='image/delivery.png') }}");
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center center;
+        width:var(--iconw);
+        height:var(--iconw);
+    }    
+    .delivering{
+        background-image: url("{{ url_for('static', filename='image/package.png') }}");
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center center;
+        width:var(--iconw);
+        height:var(--iconw);
+    }
+    .arrived
+    {
+        background-image: url("{{ url_for('static', filename='image/delivery-box.png') }}");
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center center;
+        width:var(--iconw);
+        height:var(--iconw);
+    }
+    .operation-btn{
+        font-size:0.8rem;
+        padding: 3px 3px;
+    }
 </style>
-
-
 <script>
     function changetagcolor(){
         a=document.querySelectorAll(".delivery-condition")
         console.log(a)
         b=document.querySelector(".delivery-condition")
         console.log(b)
-
-        a.forEach(function(item){
+        a.forEach(function(item){   
             console.log(item)
             if(item.innerHTML==' 運送中'){
-                item.setAttribute('class','badge badge-pill badge-warning')
+                item.setAttribute('class','badge badge-pill badge-warning transportingTag')
             }
             if(item.innerHTML==' 交貨中'){
-                item.setAttribute('class','badge badge-pill badge-info')
+                item.setAttribute('class','badge badge-pill badge-info deliveringTag')
             }
             if(item.innerHTML==' 已送達'){
-                item.setAttribute('class','badge badge-pill badge-success')
+                item.setAttribute('class','badge badge-pill badge-success arrivedTag')
             }
         })
+
+        a=document.querySelectorAll(".delivery-condition")
+        console.log(a)
     }
 
     window.addEventListener("load", function(event) {
           console.log("All resources finished loading!");
           changetagcolor()
+          $("<div class='transporting'></div>").insertBefore('.transportingTag');
+          $("<div class='delivering'></div>").insertBefore('.deliveringTag');
+          $("<div class='arrived'></div>").insertBefore('.arrivedTag');
+
     });
     $(document).ready( function () {
-        $('#myTable').DataTable();
-    } );
+        var table= $('#example').DataTable( {
+            "initComplete": function(settings, json) {
+            },
+            language: {
+                "sProcessing": "處理中...",
+                "sLengthMenu": "顯示 _MENU_ 項結果",
+                "sZeroRecords": "沒有匹配結果",
+                "sInfo": "顯示第 _START_ 至 _END_ 項結果，共 _TOTAL_ 項",
+                "sInfoEmpty": "顯示第 0 至 0 項結果，共 0 項",
+                "sInfoFiltered": "(由 _MAX_ 項結果過濾)",
+                "sInfoPostFix": "",
+                "sSearch": "搜尋:",
+                "sUrl": "",
+                "sEmptyTable": "表中資料為空",
+                "sLoadingRecords": "載入中...",
+                "sInfoThousands": ",",
+                "oPaginate": {
+                    "sFirst": "首頁",
+                    "sPrevious": "上頁",
+                    "sNext": "下頁",
+                    "sLast": "末頁"
+                },
+                "oAria": {
+                    "sSortAscending": ": 以升序排列此列",
+                    "sSortDescending": ": 以降序排列此列"
+                }
+            },
+            buttons: [ 'copy', 'excel', 'colvis' ]
+        });
+        table.buttons().container().appendTo( '#example_wrapper .col-md-6:eq(0)' );
+    });
 </script>
 
 <div class="container">
-    <h2>Hover Rows</h2>      
-    <table class="table table-hover" id="myTable">
+    <div class="deliver-table" id="deliver-table">
+
+    <table class="table table-hover" id="example">
       <thead>
         <tr>
           <th>訂購人</th>
@@ -84,13 +166,15 @@
           </td>
           <td><span class="badge badge-pill delivery-condition"> {{ delivery.delivery_condition }}</span></td>
           <td>
-            <span href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</span>
-            <span href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</span>
+            <span href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block operation-btn" type="submit" pb-role="submit">通知收貨</span>
+            <span href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block operation-btn" type="button" pb-role="submit">上傳圖片</span>
         </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
+
   </div>
   
 
@@ -135,8 +219,8 @@
                         <div class="col-sm-3">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <a href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block" type="submit" pb-role="submit">通知收貨</a>
-                                    <a href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block" type="button" pb-role="submit">上傳圖片</a>
+                                    <a href="/{{ delivery.id }}/send_notify?creattime={{ delivery.creattime }}" class="btn btn-primary btn-block operation-btn" type="submit" pb-role="submit">通知收貨</a>
+                                    <a href="/{{ delivery.id }}/upload_file_page" class="btn btn-primary btn-block operation-btn" type="button" pb-role="submit">上傳圖片</a>
                                 </div>
                             </div>
                         </div>

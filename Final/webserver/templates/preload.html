@@ -1,15 +1,7 @@
 {% extends "base.html" %} {% block title %} CloudProg21-FinalProject-Team14 {% endblock %} {% block header %}
-<ul class="nav nav-pills justify-content-end">
-    <li class="nav-item">
-        <a class="nav-link active" href="/">運送清單</a>
-    </li>
-    <li class="nav-item">
-        <li><a class="nav-link " href="/addDelivery">新增訂單</a></li>
-    </li>
-</ul>
 
 {% endblock %} {% block main %}
-<img src="{{ url_for('static', filename='image/FlatPreloaders.gif') }}">
+<img width='100%' src="{{ url_for('static', filename='image/FlatPreloaders.gif') }}">
 
 <script type="text/javascript">// <![CDATA[
     function preloader(){

@@ -9,16 +9,29 @@
 
     <title>{% block title %}{% endblock %}</title>
     <!-- Bootstrap core CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js" integrity="sha256-TI0rIaxop+pDlHNVI6kDCFvmpxNYUnVH/SMjknZ/W0Y=" crossorigin="anonymous"></script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.bootstrap4.min.css">
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-    
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.bootstrap4.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
+
     <!-- Custom styles for this template -->
     <link href="{{ url_for('static', filename='bootstrap/css/jumbotron-narrow.css') }}" rel="stylesheet">
 
@@ -55,9 +68,13 @@
         .card-body{
             background-color: #F0F8FF;
         }
+        @media(max-width:768px){
+            .myChart{
+                height: 300px;
+            }
+        }
 
     </style>
-
 </head>
 
 <body style="background-color: #F0F8FF">
@@ -65,7 +82,7 @@
     <div class="container">
         <div class="header">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <a class="navbar-brand"  href="#">Smart Boxes</a>
+                <a class="navbar-brand"  href="/">Smart Boxes</a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                     </button>
@@ -80,11 +97,97 @@
                     </ul>
                 </div>
             </nav>
-            <div class="bg-info jumbotron text-left text-white">
-                <h5>XXX司機：</h5>
-                <li> 今日訂單數目：3</li> 
-                <li> 未處理數目：2</li>
-                <li> 已完成：2</li>
+            <div class="row">
+                <div class="col-12 col-md-3">
+                    <div class="bg-info jumbotron text-left text-white">
+                        <h5>親愛的 吳柏毅 司機：</h5>
+                        <li> 今日訂單數目：19</li> 
+                        <li> 未處理數目：12</li>
+                        <li> 已完成：7</li>
+                    </div>
+                </div>
+                <div class="col-12 col-md-9 myChart">
+                    <div id="main" style="width: 100%; height:100%; padding: 4px 2px;"></div>
+                    <script type="text/javascript">
+                        // 基于准备好的dom，初始化echarts实例
+                        $(window).resize(function() {
+                            myChart.resize();
+                            
+                            });
+                        var myChart = echarts.init(document.getElementById('main'));
+                
+                        // 指定图表的配置项和数据
+                        option = {
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'cross',
+                                    crossStyle: {
+                                        color: '#999'
+                                    }
+                                }
+                            },
+                            toolbox: {
+                                feature: {
+                                    dataView: {show: true, readOnly: false},
+                                    magicType: {show: true, type: ['line', 'bar']},
+                                    restore: {show: true},
+                                    saveAsImage: {show: true}
+                                }
+                            },
+                            legend: {
+                                data: ['移動距離', '完成訂單']
+                            },
+                            xAxis: [
+                                {
+                                    type: 'category',
+                                    data: ['6/9', '6/10', '6/11', '6/12', '6/13', '6/14', '6/15', '6/16', '6/17'],
+                                    axisPointer: {
+                                        type: 'shadow'
+                                    }
+                                }
+                            ],
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    name: '完成件數',
+                                    min: 0,
+                                    max: 30,
+                                    interval: 5,
+                                    axisLabel: {
+                                        formatter: '{value} 件'
+                                    }
+                                },
+                                {
+                                    type: 'value',
+                                    name: '距離',
+                                    min: 0,
+                                    max: 300,
+                                    interval: 50,
+                                    axisLabel: {
+                                        formatter: '{value} KM'
+                                    }
+                                }
+                            ],
+                            series: [
+                                {
+                                    name: '完成訂單',
+                                    type: 'bar',
+                                    data: [14,13,18,15,20,18,30,22,7]
+                                },
+                                {
+                                    name: '移動距離',
+                                    type: 'line',
+                                    yAxisIndex: 1,
+                                    data: [80,70,90,150,155,130,263,178,60]
+                                }
+                            ]
+                        };
+                
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    </script>
+                </div>
             </div>
             {% block header %} {% endblock %}
         </div>
