@@ -40,6 +40,12 @@ def lambda_handler(event, context):
             'statusCode': 200,
             'body': json.dumps('push msg')
         }
+    elif '說明' in text:
+        push_msg(msg['userid'],['歡迎使用智慧包裹箱服務，你可以透過簡單的line回覆來控制你的包裹箱\n下方按鈕可控制開關鎖，也可以查詢訂單，輸入「照片」及會回傳目前最新包裹箱照片。'])
+        return {
+            'statusCode': 200,
+            'body': json.dumps('push msg')
+        }
     else:
         text_msg['text'] = text
         data["messages"] = [text_msg]
@@ -88,8 +94,3 @@ pip install -r requirements.txt -t ./
 zip -r9 photo.zip ./
 aws lambda update-function-code --function-name photo --zip-file fileb://photo.zip --region us-east-1
 """
-
-# event = {'Records': [{'messageId': '12021715-e626-437f-a896-2adcc85a0cfa', 'receiptHandle': 'AQEB/7o4qg5kJRdrr63YtwpouYg8+5du7//KeG5f8CgLDWjF2gruKhqgoHSwSTkujniijfpj6k7gHbP5698h03KomK86mfNmc3QWfKZ0ZzkJhtOk/QaU4TRdVT3t+lJPgQNzqlFJ/WoJ+0pBgVsUtzGq3fjd+DOtRUTx1A57jX5I/IQoC9pdpR6QuvUcThEf9qp9t6KTSBqQY74fzfJ2ZfYWMOY2OeVv93jYDqFaBh5qLzfPAc7Uyo3Dss2I0O6a1uEHSExkOVmhddT6U/et7Y67A/htYQjcqoZ5kDvuVTAovbCcrp5JcLKCXGUJVRUYlaQOsjlGY8jIcluHD8OtwZbXp6UA8MxDGcuLiLqU/NuO9E4vmkT4dkc76hsNraiXDFLJ', 'body': '{"replyToken": "fdd8c7944d714356b5ba7acb06273887", "userid": "Ufd485d2a5ab0076d7bc184a1f4bada1e", "text": "\\u8a02\\u55ae\\u72c0\\u614b"}', 'attributes': {'ApproximateReceiveCount': '9', 'SentTimestamp': '1623656633590', 'SenderId': 'AROA3LWIFOZEVOYTEBOTF:line', 'ApproximateFirstReceiveTimestamp': '1623656633590'}, 'messageAttributes': {}, 'md5OfBody': '38c2ce4c13c00c495b34d3761e65115a', 'eventSource': 'aws:sqs', 'eventSourceARN': 'arn:aws:sqs:us-east-1:781030094409:photo', 'awsRegion': 'us-east-1'}]}
-# {'Records': [{'messageId': '12021715-e626-437f-a896-2adcc85a0cfa', 'receiptHandle': 'AQEB/7o4qg5kJRdrr63YtwpouYg8+5du7//KeG5f8CgLDWjF2gruKhqgoHSwSTkujniijfpj6k7gHbP5698h03KomK86mfNmc3QWfKZ0ZzkJhtOk/QaU4TRdVT3t+lJPgQNzqlFJ/WoJ+0pBgVsUtzGq3fjd+DOtRUTx1A57jX5I/IQoC9pdpR6QuvUcThEf9qp9t6KTSBqQY74fzfJ2ZfYWMOY2OeVv93jYDqFaBh5qLzfPAc7Uyo3Dss2I0O6a1uEHSExkOVmhddT6U/et7Y67A/htYQjcqoZ5kDvuVTAovbCcrp5JcLKCXGUJVRUYlaQOsjlGY8jIcluHD8OtwZbXp6UA8MxDGcuLiLqU/NuO9E4vmkT4dkc76hsNraiXDFLJ', 'body': '{"replyToken": "fdd8c7944d714356b5ba7acb06273887", "userid": "Ufd485d2a5ab0076d7bc184a1f4bada1e", "text": "\\u8a02\\u55ae\\u72c0\\u614b"}', 'attributes': {'ApproximateReceiveCount': '9', 'SentTimestamp': '1623656633590', 'SenderId': 'AROA3LWIFOZEVOYTEBOTF:line', 'ApproximateFirstReceiveTimestamp': '1623656633590'}, 'messageAttributes': {}, 'md5OfBody': '38c2ce4c13c00c495b34d3761e65115a', 'eventSource': 'aws:sqs', 'eventSourceARN': 'arn:aws:sqs:us-east-1:781030094409:photo', 'awsRegion': 'us-east-1'}]}
-
-# lambda_handler(event,"test")
